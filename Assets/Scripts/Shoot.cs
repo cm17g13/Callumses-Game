@@ -4,7 +4,12 @@ using System.Collections;
 public class Shoot : MonoBehaviour {
 	
 	public Rigidbody projectile;
+	public GameObject status;
+	public Material enabled;
+	public Material disabled;
 	public float speed = 20;
+	public float time = 0;
+	public float shotTime = 1;
 		
 	// Use this for initialization
 	void Start () {
@@ -13,13 +18,18 @@ public class Shoot : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (Input.GetMouseButtonDown(0))
-		{
-			Debug.Log("I am trying to fire");
-			Rigidbody instantiatedProjectile = Instantiate(projectile, transform.position, Quaternion.Euler(90,0,0)) as Rigidbody;
-			
-			instantiatedProjectile.velocity = transform.TransformDirection(new Vector3(0, 0,speed));
-			
+		
+		time  = time + Time.deltaTime;
+		Debug.Log(time);
+		if (time > shotTime) {
+			status.GetComponent<Renderer>().material = enabled; 
+			if (Input.GetMouseButtonDown (0)) {
+
+				Rigidbody instantiatedProjectile = Instantiate (projectile, transform.position, Quaternion.Euler (90, 0, 0)) as Rigidbody;
+				instantiatedProjectile.velocity = transform.TransformDirection (new Vector3 (0, 0, speed));
+				time = 0;
+				status.GetComponent<Renderer>().material = disabled;
+			}
 		}
 	}
 }
