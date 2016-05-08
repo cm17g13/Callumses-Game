@@ -16,7 +16,7 @@ public class Shoot : MonoBehaviour {
 		if (Input.GetMouseButtonDown(0))
 		{
 			Debug.Log("I am trying to fire");
-			Rigidbody instantiatedProjectile = Instantiate(projectile, transform.position, transform.rotation) as Rigidbody;
+			Rigidbody instantiatedProjectile = Instantiate(projectile, transform.position, Quaternion.Euler(90,0,0)) as Rigidbody;
 			
 			instantiatedProjectile.velocity = transform.TransformDirection(new Vector3(0, 0,speed));
 			
