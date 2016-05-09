@@ -2,7 +2,7 @@
 using System.Collections;
 using System;
 
-public class RoomGen : MonoBehaviour {
+public class RoomGenerator {
     [Flags]
     public enum GridState : int
     {
@@ -12,13 +12,13 @@ public class RoomGen : MonoBehaviour {
         RoomAssigned = 4
     }
 
-    protected GridState[,] roomMap;
-    protected int mapSize;
+    public GridState[,] map;
+    public int mapSize;
 
-    public void init(int newMapSize)
+    public RoomGenerator(int newMapSize)
     {
         mapSize = newMapSize;
-        roomMap = new GridState[mapSize, mapSize];
+        map = new GridState[mapSize, mapSize];
     }
 
     //Creates a room by assigning it in the map and allocating north and west walls.
@@ -34,26 +34,27 @@ public class RoomGen : MonoBehaviour {
         {
             for(int y = yStart; y < yHighestCoord; y++)
             {
-                roomMap[x, y] = GridState.Clear;
+                map[x, y] = GridState.Clear;
                 if (x == room.x)
                 {
-                    roomMap[x, y] |= GridState.NorthWall;
+                    map[x, y] |= GridState.NorthWall;
                 }
                 //Handle adding South wall;
                 if (x == xHighestCoord) { }
                 if( y == room.y)
                 {
-                    roomMap[x, y] |= GridState.WestWall;
+                    map[x, y] |= GridState.WestWall;
                 }
                 //Handle adding East wall
                 if (y == yHighestCoord) { }
-                roomMap[x, y] |= GridState.RoomAssigned;
+                map[x, y] |= GridState.RoomAssigned;
             }
         }
     }
 
     public void createMap()
     {
-
+        Rect objectiveRoom = new Rect(2, 2, 5, 5);
+        createRoom(objectiveRoom);
     }
 }
