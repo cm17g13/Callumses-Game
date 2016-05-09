@@ -8,7 +8,7 @@ public class Shoot : MonoBehaviour {
 	public Material enabled;
 	public Material disabled;
 	public float speed = 20;
-	public float time = 0;
+	public float time = 1;
 	public float shotTime = 1;
 		
 	// Use this for initialization
@@ -20,15 +20,14 @@ public class Shoot : MonoBehaviour {
 	void Update () {
 		
 		time  = time + Time.deltaTime;
-		Debug.Log(time);
+		//Debug.Log(time);
 		if (time > shotTime) {
 			status.GetComponent<Renderer>().material = enabled; 
 			if (Input.GetMouseButtonDown (0)) {
-
 				Rigidbody instantiatedProjectile = Instantiate (projectile, transform.position, Quaternion.Euler (90, 0, 0)) as Rigidbody;
 				instantiatedProjectile.velocity = transform.TransformDirection (new Vector3 (0, 0, speed));
-				time = 0;
 				status.GetComponent<Renderer>().material = disabled;
+				time = 0;
 			}
 		}
 	}
