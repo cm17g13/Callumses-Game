@@ -17,13 +17,13 @@ public class RoomCreator : MonoBehaviour {
         calculateOffsets();
         generator.createMap();
         generator.mapSize = 2;
-        generator.map = new RoomGenerator.GridState[2,2] { { RoomGenerator.GridState.NorthWall, RoomGenerator.GridState.NorthWall}, { RoomGenerator.GridState.WestWall, RoomGenerator.GridState.WestWall} };
+        generator.map = new RoomGenerator.GridState[2,2] { { RoomGenerator.GridState.NorthWall, RoomGenerator.GridState.NorthWall}, { RoomGenerator.GridState.WestWall, RoomGenerator.GridState.Clear} };
         spawnRoom();
 	}
 
     void calculateOffsets()
     {
-        northWallOffset = new Vector3(0, wallHeight/2, -cellSizeInWorldUnits / 2);
+        northWallOffset = new Vector3(0, wallHeight/2, cellSizeInWorldUnits / 2);
         westWallOffset = new Vector3(-cellSizeInWorldUnits / 2, wallHeight/2, 0);
     }
 
@@ -55,7 +55,7 @@ public class RoomCreator : MonoBehaviour {
             Vector3 wallDimensions = new Vector3(cellSizeInWorldUnits, wallHeight, wallThickness);
             wall.transform.localScale = wallDimensions;
             wall.transform.position = gridToWorldPosition(x, y) + northWallOffset;
-        } else
+        } else if((wallDirection & RoomGenerator.GridState.WestWall) == RoomGenerator.GridState.WestWall)
         {
             Vector3 wallDimensions = new Vector3(wallThickness, wallHeight, cellSizeInWorldUnits);
             wall.transform.localScale = wallDimensions;
