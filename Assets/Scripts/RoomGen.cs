@@ -52,6 +52,12 @@ public class RoomGenerator {
         }
     }
 
+    public void useTestData()
+    {
+        mapSize = 2;
+        map = new RoomGenerator.GridState[2,2] { { RoomGenerator.GridState.NorthWall, RoomGenerator.GridState.NorthWall}, { RoomGenerator.GridState.WestWall | RoomGenerator.GridState.NorthWall, RoomGenerator.GridState.Clear} };
+    }
+
     public void createMap()
     {
         Rect objectiveRoom = new Rect(2, 2, 5, 5);

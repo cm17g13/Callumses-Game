@@ -16,8 +16,6 @@ public class RoomCreator : MonoBehaviour {
 	void Start () {
         calculateOffsets();
         generator.createMap();
-        generator.mapSize = 2;
-        generator.map = new RoomGenerator.GridState[2,2] { { RoomGenerator.GridState.NorthWall, RoomGenerator.GridState.NorthWall}, { RoomGenerator.GridState.WestWall, RoomGenerator.GridState.Clear} };
         spawnRoom();
 	}
 
@@ -45,22 +43,25 @@ public class RoomCreator : MonoBehaviour {
 
     void spawnCell(int x, int y)
     {
-        createWall(x, y, generator.map[x, y]);
+        if ((generator.map[x,y] & RoomGenerator.GridState.NorthWall) == RoomGenerator.GridState.NorthWall)
+        {
+            createWall(x, y, RoomGenerator.GridState.NorthWall);
+        }
+        if ((generator.map[x, y] & RoomGenerator.GridState.WestWall) == RoomGenerator.GridState.WestWall)
+        {
+            createWall(x, y, RoomGenerator.GridState.WestWall);
+        }
     }
 
     GameObject createWall(int x, int y, RoomGenerator.GridState wallDirection)
     {
-        GameObject wall = Instantiate(wallBlock);
-        if ((wallDirection & RoomGenerator.GridState.NorthWall) == RoomGenerator.GridState.NorthWall) {
-            Vector3 wallDimensions = new Vector3(cellSizeInWorldUnits, wallHeight, wallThickness);
-            wall.transform.localScale = wallDimensions;
-            wall.transform.position = gridToWorldPosition(x, y) + northWallOffset;
-        } else if((wallDirection & RoomGenerator.GridState.WestWall) == RoomGenerator.GridState.WestWall)
-        {
-            Vector3 wallDimensions = new Vector3(wallThickness, wallHeight, cellSizeInWorldUnits);
-            wall.transform.localScale = wallDimensions;
-            wall.transform.position = gridToWorldPosition(x, y) + westWallOffset;
-        }
+        Vector3 wallDimensions = new Vector3(cellSizeInWorldUnits, wallHeight, wallThickness);
+        Vector3 offset = (wallDirection == RoomGenerator.GridState.NorthWall) ? northWallOffset : westWallOffset;
+        Quaternion rotation = (wallDirection == RoomGenerator.GridState.NorthWall) ? Quaternion.identity : Quaternion.Euler(0, 90, 0);
+        Vector3 position = gridToWorldPosition(x, y) + offset;
+
+        GameObject wall = (GameObject)Instantiate(wallBlock, position, rotation);
+        wall.transform.localScale = wallDimensions;
         return wall;
     }
 }
