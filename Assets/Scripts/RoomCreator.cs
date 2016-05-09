@@ -4,7 +4,7 @@ using System.Collections;
 public class RoomCreator : MonoBehaviour {
     public GameObject wallBlock;
     public Vector3 origin;
-    public float cellSizeInWorldUnits = 1;
+    public float cellSizeInWorldUnits = 3;
     public float wallThickness = 0.1f;
     public float wallHeight = 3f;
 
