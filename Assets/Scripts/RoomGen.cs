@@ -14,16 +14,8 @@ public enum Dir
 
 public class Cell
 {
-    [Flags]
-    public enum Walls : int
-    {
-        None = 0,
-        North = 1,
-        West = 2,
-    }
-
+    public int roomId = 0;
     public bool isAssigned = false;
-    public Walls walls = Walls.None;
     public int x, y;
 }
 
@@ -32,6 +24,8 @@ public class RoomGenerator {
 
     public Cell[,] map;
     public int mapSize;
+
+    private int currentRoomId = 0;
 
     public RoomGenerator(int newMapSize)
     {
@@ -56,6 +50,8 @@ public class RoomGenerator {
     //Should work, despite not allocation south and east, as long as all squares allocated.
     public void createRoom(Rect room)
     {
+        currentRoomId++;
+
         int xMin = (int)room.x;
         int yMin = (int)room.y;
         int xMax = (int)room.xMax - 1;
@@ -65,18 +61,7 @@ public class RoomGenerator {
         {
             for(int y = yMin; y <= yMax; y++)
             {
-                if (x == xMin)
-                {
-                    map[x, y].walls |= Cell.Walls.North;
-                }
-                //Handle adding South wall;
-                if (x == xMax) { }
-                if( y == yMin)
-                {
-                    map[x, y].walls |= Cell.Walls.West;
-                }
-                //Handle adding East wall
-                if (y == yMax) { }
+                map[x, y].roomId = currentRoomId;
                 map[x, y].isAssigned = true;
             }
         }
@@ -85,7 +70,7 @@ public class RoomGenerator {
     public void useTestData()
     {
         mapSize = 2;
-        map = new Cell[2,2] { { new Cell() { walls = Cell.Walls.North }, new Cell() { walls = Cell.Walls.North } }, { new Cell() { walls = Cell.Walls.North | Cell.Walls.West }, new Cell() { walls = Cell.Walls.None } } };
+        map = new Cell[2, 2] { { new Cell() { x = 0, y = 0, roomId = 1 }, new Cell() { x = 0, y = 1, roomId = 1 } }, { new Cell() { x = 1, y = 0, roomId = 2 }, new Cell() { x = 1, y = 1, roomId = 2 } } };
     }
     
     public List<Cell> getUnassignedSquares()
@@ -113,10 +98,10 @@ public class RoomGenerator {
     {
         forEachCell((x, y) =>
         {
-            if(map[x,y].walls != Cell.Walls.None && UnityEngine.Random.value < 0.3)
+            /*if(map[x,y].walls != Cell.Walls.None && UnityEngine.Random.value < 0.3)
             {
                 map[x, y].walls = Cell.Walls.None;
-            }
+            }*/
         });
     }
 
@@ -141,7 +126,7 @@ public class RoomGenerator {
         }
     }
 
-    private Cell getCellInDirection(int x, int y, Dir dir)
+    public Cell getCellInDirection(int x, int y, Dir dir)
     {
         int xOffset = 0, yOffset = 0;
         switch (dir)
@@ -218,7 +203,7 @@ public class RoomGenerator {
         int width = corridorDirection == Dir.North || corridorDirection == Dir.South ? 1 : actualLength;
         int height = corridorDirection == Dir.North || corridorDirection == Dir.South ? actualLength : 1;
 
-        Debug.Log("Creating Corridor " + x + " " + y + " " + width + " " + height);
+        //Debug.Log("Creating Corridor " + x + " " + y + " " + width + " " + height);
         createRoom(new Rect(x, y, width, height));
     }
 }

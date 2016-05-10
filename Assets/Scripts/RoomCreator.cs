@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
+using System.Collections.Generic;
 
 public class RoomCreator : MonoBehaviour {
     public GameObject wallBlock;
@@ -8,26 +10,31 @@ public class RoomCreator : MonoBehaviour {
     public float wallThickness = 0.1f;
     public float wallHeight = 3f;
 
-    private Vector3 northWallOffset;
-    private Vector3 westWallOffset;
+    private Dictionary<Dir, Vector3> offsets;
     private RoomGenerator generator = new RoomGenerator(10);
 
 	// Use this for initialization
 	void Start () {
         calculateOffsets();
         generator.createMap();
+        generator.useTestData();
         spawnRoom();
 	}
 
     void calculateOffsets()
     {
-        northWallOffset = new Vector3(0, wallHeight/2, cellSizeInWorldUnits / 2);
-        westWallOffset = new Vector3(-cellSizeInWorldUnits / 2, wallHeight/2, 0);
+        offsets = new Dictionary<Dir, Vector3>
+        {
+            { Dir.North, new Vector3(0, wallHeight / 2, cellSizeInWorldUnits / 2) },
+            { Dir.West, new Vector3(-cellSizeInWorldUnits / 2, wallHeight/2, 0) },
+            { Dir.South, new Vector3(0, wallHeight / 2, -cellSizeInWorldUnits / 2) },
+            { Dir.East, new Vector3(cellSizeInWorldUnits / 2, wallHeight/2, 0) }
+        };
     }
 
     Vector3 gridToWorldPosition(int x, int y)
     {
-        return origin + new Vector3(y * cellSizeInWorldUnits, 0, -x * cellSizeInWorldUnits);
+        return origin + new Vector3(x * cellSizeInWorldUnits, 0, -y * cellSizeInWorldUnits);
     }
 
     void spawnRoom()
@@ -43,22 +50,28 @@ public class RoomCreator : MonoBehaviour {
 
     void spawnCell(int x, int y)
     {
-        if ((generator.map[x, y].walls & Cell.Walls.North) == Cell.Walls.North)
+        Cell currentCell = generator.map[x, y];
+
+        foreach(Dir dir in Enum.GetValues(typeof(Dir)))
         {
-            createWall(x, y, Cell.Walls.North);
-        }
-        if ((generator.map[x, y].walls & Cell.Walls.West) == Cell.Walls.West)
-        {
-            createWall(x, y, Cell.Walls.West);
+            Cell adjacentCell = generator.getCellInDirection(x, y, dir);
+            Debug.Log("XY " + x + " " + y + " " + adjacentCell + " " + dir);
+            if (dir != Dir.None && (adjacentCell == null || adjacentCell.roomId != currentCell.roomId))
+            {
+                Debug.Log("Spawning wall with dir " + dir);
+                if (adjacentCell != null) { Debug.Log("Cell data " + adjacentCell.x + " " + adjacentCell.y + " " + adjacentCell.roomId); }
+                createWall(x, y, dir);
+            }
         }
     }
 
-    GameObject createWall(int x, int y, Cell.Walls wallDirection)
+    GameObject createWall(int x, int y, Dir wallDirection)
     {
         Vector3 wallDimensions = new Vector3(cellSizeInWorldUnits, wallHeight, wallThickness);
-        Vector3 offset = (wallDirection == Cell.Walls.North) ? northWallOffset : westWallOffset;
-        Quaternion rotation = (wallDirection == Cell.Walls.North) ? Quaternion.identity : Quaternion.Euler(0, 90, 0);
+        Vector3 offset = offsets[wallDirection];
+        Quaternion rotation = (wallDirection == Dir.North || wallDirection == Dir.South) ? Quaternion.identity : Quaternion.Euler(0, 90, 0);
         Vector3 position = gridToWorldPosition(x, y) + offset;
+        Debug.Log("Wall created with " + x + " " + y + " " + position);
 
         GameObject wall = (GameObject)Instantiate(wallBlock, position, rotation);
         wall.transform.localScale = wallDimensions;
