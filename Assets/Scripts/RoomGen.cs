@@ -27,9 +27,29 @@ public class Cell
     public int x, y;
 }
 
+public class Boundry
+{
+    public Cell cell1;
+    public Cell cell2;
+    public Dir dir;
+
+    public Boundry(Cell newCell1, Cell newCell2, Dir newDir)
+    {
+        cell1 = newCell1;
+        cell2 = newCell2;
+        dir = newDir;
+    }
+
+    public bool Involves(Room room)
+    {
+        return cell1.room == room || cell2.room == room;
+    }
+}
+
 public class RoomGenerator {
     public int maxCorridorLength = 8;
 
+    public List<Boundry> boundries;
     public List<Room> rooms;
     public Cell[,] map;
     public int mapSize;
@@ -64,6 +84,7 @@ public class RoomGenerator {
 
     public void init()
     {
+        boundries = new List<Boundry>();
         rooms = new List<Room>();
         map = new Cell[mapSize, mapSize];
         forEachCell((x, y) => map[x, y] = new Cell() { x = x, y = y });
@@ -74,9 +95,31 @@ public class RoomGenerator {
         init();
         Rect objectiveRoom = new Rect(2, 2, 5, 5);
         createRoom(objectiveRoom);
-        spawnCorridors();
+        createCorridors();
+
+        determineAdjacentRooms();
+        calculateBoundries();
+
         //connectCorridors();
-        connectCorridors2();
+        //connectCorridors2();
+    }
+
+    private void calculateBoundries()
+    {
+        forEachCell((x, y) =>
+        {
+            Cell currentCell = map[x, y];
+            Cell eastCell = getCellInDirection(x, y, Dir.East);
+            Cell southCell = getCellInDirection(x, y, Dir.South);
+            if(eastCell != null && eastCell.room != currentCell.room)
+            {
+                boundries.Add(new Boundry(currentCell, eastCell, Dir.East));
+            }
+            if (southCell != null && southCell.room != currentCell.room)
+            {
+                boundries.Add(new Boundry(currentCell, southCell, Dir.South));
+            }
+        });
     }
 
     //Creates a room by assigning it in the map and allocating north and west walls.
@@ -162,7 +205,6 @@ public class RoomGenerator {
 
     private void connectCorridors2()
     {
-        determineAdjacentRooms();
         HashSet<Room> accessibleRooms = new HashSet<Room>();
         accessibleRooms.Add(rooms[0]);
         while(accessibleRooms.Count < rooms.Count)
@@ -195,7 +237,7 @@ public class RoomGenerator {
         }
     }
 
-    private void spawnCorridors()
+    private void createCorridors()
     {
         List<Cell> unassigned = getUnassignedSquares();
 

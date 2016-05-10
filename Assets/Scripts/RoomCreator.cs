@@ -17,7 +17,7 @@ public class RoomCreator : MonoBehaviour {
 	void Start () {
         calculateOffsets();
         generator.createMap();
-        spawnRoom();
+        spawnArea();
 	}
 
     void calculateOffsets()
@@ -36,29 +36,17 @@ public class RoomCreator : MonoBehaviour {
         return origin + new Vector3(x * cellSizeInWorldUnits, 0, -y * cellSizeInWorldUnits);
     }
 
-    void spawnRoom()
+    void spawnArea()
     {
-        for(int x = 0; x < generator.map.GetLength(0); x++)
+        foreach(Boundry boundry in generator.boundries)
         {
-            for(int y = 0; y < generator.map.GetLength(1); y++)
-            {
-                spawnCell(x, y);
-            }
+            spawnBoundry(boundry);
         }
     }
 
-    void spawnCell(int x, int y)
+    void spawnBoundry(Boundry boundry)
     {
-        Cell currentCell = generator.map[x, y];
-
-        generator.forEachAdjacentCell(currentCell, (adjacentCell, dir) =>
-        {
-            if (adjacentCell == null || adjacentCell.room != currentCell.room)
-            {
-                if(currentCell.transitions.Contains(dir)) { return; }
-                createWall(currentCell.x, currentCell.y, dir);
-            }
-        });
+        createWall(boundry.cell1.x, boundry.cell1.y, boundry.dir);
     }
 
     GameObject createWall(int x, int y, Dir wallDirection)
