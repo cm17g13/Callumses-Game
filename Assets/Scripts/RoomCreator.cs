@@ -43,7 +43,6 @@ public class RoomCreator : MonoBehaviour {
 
     void spawnCell(int x, int y)
     {
-        print("XY: " + x + " " + y); 
         if ((generator.map[x, y].walls & Cell.Walls.North) == Cell.Walls.North)
         {
             createWall(x, y, Cell.Walls.North);
