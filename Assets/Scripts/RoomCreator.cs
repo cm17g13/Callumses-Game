@@ -53,13 +53,9 @@ public class RoomCreator : MonoBehaviour {
 
         generator.forEachAdjacentCell(currentCell, (adjacentCell, dir) =>
         {
-            if (adjacentCell == null || adjacentCell.roomId != currentCell.roomId)
+            if (adjacentCell == null || adjacentCell.room != currentCell.room)
             {
-                Debug.Log("Adjacent: " + generator.getAdjacentRoomCount(x, y));
-                if (generator.getAdjacentRoomCount(x, y) >= 3 && adjacentCell != null && adjacentCell.roomId != currentCell.roomId && UnityEngine.Random.value < 0.8)
-                {
-                    return;
-                }
+                if(currentCell.transitions.Contains(dir)) { return; }
                 createWall(currentCell.x, currentCell.y, dir);
             }
         });

@@ -12,26 +12,29 @@ public enum Dir
     West
 }
 
+public class Room
+{
+    public HashSet<Room> transitions = new HashSet<Room>();
+}
+
 public class Cell
 {
-    public int roomId = 0;
-    public bool isAssigned = false;
+    public Room room = null;
+    public bool isAssigned { get { return room != null; } }
+    public List<Dir> transitions = new List<Dir>();
     public int x, y;
 }
 
 public class RoomGenerator {
     public int maxCorridorLength = 8;
 
+    public List<Room> rooms;
     public Cell[,] map;
     public int mapSize;
-
-    private int currentRoomId = 0;
 
     public RoomGenerator(int newMapSize)
     {
         mapSize = newMapSize;
-        map = new Cell[mapSize, mapSize];
-        forEachCell((x, y) => map[x, y] = new Cell() { x = x, y = y });
     }
 
     public delegate void GridIterCallback(int x, int y);
@@ -57,23 +60,39 @@ public class RoomGenerator {
         }
     }
 
+    public void init()
+    {
+        rooms = new List<Room>();
+        map = new Cell[mapSize, mapSize];
+        forEachCell((x, y) => map[x, y] = new Cell() { x = x, y = y });
+    }
+
+    public void createMap()
+    {
+        init();
+        Rect objectiveRoom = new Rect(2, 2, 5, 5);
+        createRoom(objectiveRoom);
+        spawnCorridors();
+        connectCorridors();
+    }
+
     //Creates a room by assigning it in the map and allocating north and west walls.
     //Should work, despite not allocation south and east, as long as all squares allocated.
-    public void createRoom(Rect room)
+    public void createRoom(Rect dimensions)
     {
-        currentRoomId++;
 
-        int xMin = (int)room.x;
-        int yMin = (int)room.y;
-        int xMax = (int)room.xMax - 1;
-        int yMax = (int)room.yMax - 1;
+        int xMin = (int)dimensions.x;
+        int yMin = (int)dimensions.y;
+        int xMax = (int)dimensions.xMax - 1;
+        int yMax = (int)dimensions.yMax - 1;
+
+        Room room = new Room();
 
         for(int x = xMin; x <= xMax; x++)
         {
             for(int y = yMin; y <= yMax; y++)
             {
-                map[x, y].roomId = currentRoomId;
-                map[x, y].isAssigned = true;
+                map[x, y].room = room;
             }
         }
     }
@@ -81,7 +100,9 @@ public class RoomGenerator {
     public void useTestData()
     {
         mapSize = 2;
-        map = new Cell[2, 2] { { new Cell() { x = 0, y = 0, roomId = 1 }, new Cell() { x = 0, y = 1, roomId = 1 } }, { new Cell() { x = 1, y = 0, roomId = 2 }, new Cell() { x = 1, y = 1, roomId = 2 } } };
+        Room roomOne = new Room();
+        Room roomTwo = new Room();
+        map = new Cell[2, 2] { { new Cell() { x = 0, y = 0, room = roomOne }, new Cell() { x = 0, y = 1, room = roomOne } }, { new Cell() { x = 1, y = 0, room = roomTwo }, new Cell() { x = 1, y = 1, room = roomTwo } } };
     }
     
     public List<Cell> getUnassignedSquares()
@@ -97,20 +118,30 @@ public class RoomGenerator {
         return squares;
     }
 
-    public void createMap()
-    {
-        Rect objectiveRoom = new Rect(2, 2, 5, 5);
-        createRoom(objectiveRoom);
-        spawnCorridors();
-        connectCorridors();
-    }
-
     private void connectCorridors()
     {
         forEachCell((x, y) =>
         {
-            int adjacentRooms = getAdjacentRoomCount(x, y);
+            Cell currentCell = map[x, y];
+            forEachAdjacentCell(currentCell, (adjacentCell, dir) =>
+            {
+                if (adjacentCell == null ||
+                    currentCell.room.transitions.Contains(adjacentCell.room) ||
+                    currentCell.room == adjacentCell.room ||
+                    currentCell.room.transitions.Count > 2)
+                {
+                    return;
+                }
+                currentCell.room.transitions.Add(adjacentCell.room);
+                currentCell.transitions.Add(dir);
+
+            });
         });
+    }
+
+    private void connectCorridors2()
+    {
+        //for()
     }
 
     private void spawnCorridors()
@@ -167,7 +198,7 @@ public class RoomGenerator {
         Cell currentCell = map[x, y];
         forEachAdjacentCell(currentCell, (adjacentCell, dir) =>
         {
-            count = (adjacentCell != null && adjacentCell.roomId == currentCell.roomId) ? count : count + 1;
+            count = (adjacentCell != null && adjacentCell.room == currentCell.room) ? count : count + 1;
         });
         return count;
     }
