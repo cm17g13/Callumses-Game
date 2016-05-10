@@ -17,7 +17,6 @@ public class RoomCreator : MonoBehaviour {
 	void Start () {
         calculateOffsets();
         generator.createMap();
-        generator.useTestData();
         spawnRoom();
 	}
 
@@ -55,11 +54,12 @@ public class RoomCreator : MonoBehaviour {
         foreach(Dir dir in Enum.GetValues(typeof(Dir)))
         {
             Cell adjacentCell = generator.getCellInDirection(x, y, dir);
-            Debug.Log("XY " + x + " " + y + " " + adjacentCell + " " + dir);
             if (dir != Dir.None && (adjacentCell == null || adjacentCell.roomId != currentCell.roomId))
             {
-                Debug.Log("Spawning wall with dir " + dir);
-                if (adjacentCell != null) { Debug.Log("Cell data " + adjacentCell.x + " " + adjacentCell.y + " " + adjacentCell.roomId); }
+                if (generator.getAdjacentRoomCount(x, y) >= 3 && adjacentCell != null && adjacentCell.roomId != currentCell.roomId && UnityEngine.Random.value < 0.8)
+                {
+                    continue;
+                }
                 createWall(x, y, dir);
             }
         }
@@ -71,7 +71,6 @@ public class RoomCreator : MonoBehaviour {
         Vector3 offset = offsets[wallDirection];
         Quaternion rotation = (wallDirection == Dir.North || wallDirection == Dir.South) ? Quaternion.identity : Quaternion.Euler(0, 90, 0);
         Vector3 position = gridToWorldPosition(x, y) + offset;
-        Debug.Log("Wall created with " + x + " " + y + " " + position);
 
         GameObject wall = (GameObject)Instantiate(wallBlock, position, rotation);
         wall.transform.localScale = wallDimensions;

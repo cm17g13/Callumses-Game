@@ -98,10 +98,7 @@ public class RoomGenerator {
     {
         forEachCell((x, y) =>
         {
-            /*if(map[x,y].walls != Cell.Walls.None && UnityEngine.Random.value < 0.3)
-            {
-                map[x, y].walls = Cell.Walls.None;
-            }*/
+            int adjacentRooms = getAdjacentRoomCount(x, y);
         });
     }
 
@@ -116,6 +113,7 @@ public class RoomGenerator {
         while (unassigned.Count > 0 && iterationsNoCountChange < abortThreshold)
         {
             iterationsNoCountChange = unassigned.Count >= lastCount ? iterationsNoCountChange + 1 : 0;
+
             spawnCorridor(unassigned[UnityEngine.Random.Range(0, unassigned.Count-1)]);
             unassigned = getUnassignedSquares();
         }
@@ -150,6 +148,18 @@ public class RoomGenerator {
         int yTest = y + yOffset;
         if (xTest < 0 || xTest >= map.GetLength(0) || yTest < 0 || yTest >= map.GetLength(1)) { return null; };
         return map[xTest, yTest];
+    }
+
+    public int getAdjacentRoomCount(int x, int y)
+    {
+        int count = 0;
+        Cell currentCell = map[x, y];
+        foreach (Dir dir in Enum.GetValues(typeof(Dir)))
+        {
+            Cell adjacentCell = getCellInDirection(x, y, dir);
+            count = (adjacentCell != null && adjacentCell.roomId == currentCell.roomId) ? count : count + 1;
+        }
+        return count;
     }
 
     private bool isDirectionFree(int x, int y, Dir dir) {
