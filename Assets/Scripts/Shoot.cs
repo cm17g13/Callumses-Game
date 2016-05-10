@@ -7,7 +7,7 @@ public class Shoot : MonoBehaviour {
 	public GameObject status;
 	public Material enabled;
 	public Material disabled;
-	public float speed = 20;
+	public float speed = 40;
 	public float time = 1;
 	public float shotTime = 1;
 		
