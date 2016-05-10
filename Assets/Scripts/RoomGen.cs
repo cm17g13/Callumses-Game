@@ -20,7 +20,7 @@ public class Cell
 }
 
 public class RoomGenerator {
-    public int maxCorridorLength = 5;
+    public int maxCorridorLength = 8;
 
     public Cell[,] map;
     public int mapSize;
@@ -43,6 +43,17 @@ public class RoomGenerator {
             {
                 callback(x, y);
             }
+        }
+    }
+
+    public delegate void AdjacentCellCallback(Cell adjacentCell, Dir dir);
+    public void forEachAdjacentCell(Cell currentCell, AdjacentCellCallback callback)
+    {
+        foreach (Dir dir in Enum.GetValues(typeof(Dir)))
+        {
+            if(dir == Dir.None) { continue; }
+            Cell adjacentCell = getCellInDirection(currentCell.x, currentCell.y, dir);
+            callback(adjacentCell, dir);
         }
     }
 
@@ -154,11 +165,10 @@ public class RoomGenerator {
     {
         int count = 0;
         Cell currentCell = map[x, y];
-        foreach (Dir dir in Enum.GetValues(typeof(Dir)))
+        forEachAdjacentCell(currentCell, (adjacentCell, dir) =>
         {
-            Cell adjacentCell = getCellInDirection(x, y, dir);
             count = (adjacentCell != null && adjacentCell.roomId == currentCell.roomId) ? count : count + 1;
-        }
+        });
         return count;
     }
 
