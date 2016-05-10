@@ -106,6 +106,18 @@ public class RoomGenerator {
         Rect objectiveRoom = new Rect(2, 2, 5, 5);
         createRoom(objectiveRoom);
         spawnCorridors();
+        connectCorridors();
+    }
+
+    private void connectCorridors()
+    {
+        forEachCell((x, y) =>
+        {
+            if(map[x,y].walls != Cell.Walls.None && UnityEngine.Random.value < 0.3)
+            {
+                map[x, y].walls = Cell.Walls.None;
+            }
+        });
     }
 
     private void spawnCorridors()
