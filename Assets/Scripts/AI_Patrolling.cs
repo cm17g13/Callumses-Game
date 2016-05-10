@@ -77,18 +77,14 @@ public class AI_Patrolling : MonoBehaviour {
     // Update is called once per frame
     void Update () {
 
-        if(InLineOfSight())
-        {
+        if(InLineOfSight()) {
             GoToPlayer();
             time = time + Time.deltaTime;
-            //Debug.Log(time);
-            if (time > shotTime)
-            {
+            if (time > shotTime) {
                 shoot();
                 time = 0;
             }
-            } else if (agent.remainingDistance < 1f)
-        {
+        } else if (agent.remainingDistance < 1f) {
             GoToNextPoint();
             time = 0;
         }	
