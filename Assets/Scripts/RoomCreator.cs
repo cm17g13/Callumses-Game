@@ -43,21 +43,22 @@ public class RoomCreator : MonoBehaviour {
 
     void spawnCell(int x, int y)
     {
-        if ((generator.map[x,y] & RoomGenerator.GridState.NorthWall) == RoomGenerator.GridState.NorthWall)
+        print("XY: " + x + " " + y); 
+        if ((generator.map[x, y].walls & Cell.Walls.North) == Cell.Walls.North)
         {
-            createWall(x, y, RoomGenerator.GridState.NorthWall);
+            createWall(x, y, Cell.Walls.North);
         }
-        if ((generator.map[x, y] & RoomGenerator.GridState.WestWall) == RoomGenerator.GridState.WestWall)
+        if ((generator.map[x, y].walls & Cell.Walls.West) == Cell.Walls.West)
         {
-            createWall(x, y, RoomGenerator.GridState.WestWall);
+            createWall(x, y, Cell.Walls.West);
         }
     }
 
-    GameObject createWall(int x, int y, RoomGenerator.GridState wallDirection)
+    GameObject createWall(int x, int y, Cell.Walls wallDirection)
     {
         Vector3 wallDimensions = new Vector3(cellSizeInWorldUnits, wallHeight, wallThickness);
-        Vector3 offset = (wallDirection == RoomGenerator.GridState.NorthWall) ? northWallOffset : westWallOffset;
-        Quaternion rotation = (wallDirection == RoomGenerator.GridState.NorthWall) ? Quaternion.identity : Quaternion.Euler(0, 90, 0);
+        Vector3 offset = (wallDirection == Cell.Walls.North) ? northWallOffset : westWallOffset;
+        Quaternion rotation = (wallDirection == Cell.Walls.North) ? Quaternion.identity : Quaternion.Euler(0, 90, 0);
         Vector3 position = gridToWorldPosition(x, y) + offset;
 
         GameObject wall = (GameObject)Instantiate(wallBlock, position, rotation);
