@@ -38,9 +38,12 @@ public class RoomCreator : MonoBehaviour {
 
     void spawnArea()
     {
-        foreach(Boundry boundry in generator.boundries)
+        foreach (Boundry boundry in generator.boundries)
         {
-            spawnBoundry(boundry);
+            if (boundry.type == Boundry.Type.wall)
+            {
+                spawnBoundry(boundry);
+            }
         }
     }
 
