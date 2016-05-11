@@ -89,6 +89,7 @@ public class AI_Patrolling : MonoBehaviour {
 
     public void Hit(float damage)
     {
+		BecomeAlert ();
         Debug.Log(this.health);
         this.health -= damage;
         Debug.Log(this.health);
@@ -97,6 +98,11 @@ public class AI_Patrolling : MonoBehaviour {
             Destroy(gameObject);
         } 
     }
+
+	public void BecomeAlert() {
+		this.state = State.Alerted;
+		GoToPlayer ();
+	}
 
     // Update is called once per frame
     void Update () {
