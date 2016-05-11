@@ -65,7 +65,7 @@ public class RoomGenerator {
     public int minCorridorLength = 2;
     public int maxCorridorLength = 4;
     public int maxAccessPortals = 4;
-    public int maxExtraPortals = 4;
+    public int maxExtraPortals = 2;
 
     public List<Boundry> boundries;
     public List<Room> rooms;
@@ -139,14 +139,6 @@ public class RoomGenerator {
                 boundries.Add(new Boundry(currentCell, southCell, Dir.South));
             }
         });
-
-        for (int i = 0; i < boundries.Count; i++)
-        {
-            int swapPosition = UnityEngine.Random.Range(0, boundries.Count);
-            Boundry temp = boundries[swapPosition];
-            boundries[swapPosition] = boundries[i];
-            boundries[i] = temp;
-        }
     }
 
     //Creates a room by assigning it in the map and allocating north and west walls.
@@ -211,6 +203,15 @@ public class RoomGenerator {
 
     private void connectCorridors2()
     {
+        //Shuffle boundries
+        for (int i = 0; i < boundries.Count; i++)
+        {
+            int swapPosition = UnityEngine.Random.Range(0, boundries.Count);
+            Boundry temp = boundries[swapPosition];
+            boundries[swapPosition] = boundries[i];
+            boundries[i] = temp;
+        }
+
         HashSet<Room> accessibleRooms = new HashSet<Room>();
         accessibleRooms.Add(rooms[0]);
 
@@ -230,17 +231,17 @@ public class RoomGenerator {
                         room.accessPortalCount++;
                         otherRoom.accessPortalCount++;
                         boundryAdded = true;
-                        break;
+                        //break;
                     }
                     
-                    if (room.extraPortalCount < 4 && otherRoom.extraPortalCount < 4)
+                    if (room.extraPortalCount < maxExtraPortals && otherRoom.extraPortalCount < maxExtraPortals)
                     {
                         boundry.type = Boundry.Type.portal;
                         accessibleRooms.Add(otherRoom);
                         room.extraPortalCount++;
                         otherRoom.extraPortalCount++;
                         boundryAdded = true;
-                        break;
+                        //break;
                     }
                 }
             }
