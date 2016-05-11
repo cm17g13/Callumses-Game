@@ -78,6 +78,7 @@ public class RoomGenerator {
         {
             if(dir == Dir.None) { continue; }
             Cell adjacentCell = getCellInDirection(currentCell.x, currentCell.y, dir);
+            if(adjacentCell == null) { continue; }
             callback(adjacentCell, dir);
         }
     }
