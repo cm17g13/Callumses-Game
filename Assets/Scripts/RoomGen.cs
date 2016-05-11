@@ -32,6 +32,13 @@ public class Boundry
     public Cell cell1;
     public Cell cell2;
     public Dir dir;
+    public Type type = Type.wall;
+
+    public enum Type
+    {
+        portal,
+        wall
+    }
 
     public Boundry(Cell newCell1, Cell newCell2, Dir newDir)
     {
@@ -44,9 +51,15 @@ public class Boundry
     {
         return cell1.room == room || cell2.room == room;
     }
+
+    public Room OtherRoom(Room room)
+    {
+        return (room == cell1.room) ? cell2.room : cell1.room;
+    }
 }
 
 public class RoomGenerator {
+    public int minCorridorLength = 3;
     public int maxCorridorLength = 8;
 
     public List<Boundry> boundries;
@@ -94,7 +107,7 @@ public class RoomGenerator {
     public void createMap()
     {
         init();
-        Rect objectiveRoom = new Rect(2, 2, 5, 5);
+        Rect objectiveRoom = new Rect(2, 2, 2, 2);
         createRoom(objectiveRoom);
         createCorridors();
 
@@ -102,7 +115,7 @@ public class RoomGenerator {
         calculateBoundries();
 
         //connectCorridors();
-        //connectCorridors2();
+        connectCorridors2();
     }
 
     private void calculateBoundries()
@@ -213,24 +226,12 @@ public class RoomGenerator {
             HashSet<Room> newRooms = new HashSet<Room>();
             foreach (Room room in accessibleRooms)
             {
-                foreach(Room adjacentRoom in room.adjacentRooms)
+                foreach (Boundry boundry in boundries)
                 {
-                    if(!accessibleRooms.Contains(adjacentRoom))
-                    {
-                        foreach(Cell cell in room.cells)
-                        {
-                            forEachAdjacentCell(cell, (adjacentCell, dir) =>
-                            {
-                                if (adjacentCell != null && adjacentCell.room == adjacentRoom && !newRooms.Contains(adjacentRoom))
-                                {
-                                    Debug.Log("ADding transition");
-                                    cell.transitions.Add(dir);
-                                    Dir opposite = (dir == Dir.North) ? Dir.South : (dir == Dir.South) ? Dir.North : (dir == Dir.West)? Dir.East : (dir == Dir.East)? Dir.West : Dir.None;
-                                    adjacentCell.transitions.Add(opposite);
-                                    newRooms.Add(adjacentRoom);
-                                }
-                            });
-                        }
+                    if(boundry.Involves(room) && !accessibleRooms.Contains(boundry.OtherRoom(room))) {
+                        boundry.type = Boundry.Type.portal;
+                        newRooms.Add(boundry.OtherRoom(room));
+                        break;
                     }
                 }
             }
@@ -340,7 +341,7 @@ public class RoomGenerator {
     private void spawnCorridor(Cell location)
     {
         Dir corridorDirection = getArbitraryFreeDirection(location.x, location.y);
-        int desiredLength = UnityEngine.Random.Range(1, maxCorridorLength);
+        int desiredLength = UnityEngine.Random.Range(minCorridorLength, maxCorridorLength);
         int actualLength = getMaxLengthInDirection(location.x, location.y, corridorDirection, desiredLength);
 
         int x = corridorDirection == Dir.West ? location.x - (actualLength - 1) : location.x;
