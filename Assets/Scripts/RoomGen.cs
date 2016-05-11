@@ -14,9 +14,10 @@ public enum Dir
 
 public class Room
 {
-    public HashSet<Room> transitions = new HashSet<Room>();
     public HashSet<Room> adjacentRooms = new HashSet<Room>();
     public List<Cell> cells = new List<Cell>();
+
+    public int portalCount = 0;
 }
 
 public class Cell
@@ -61,6 +62,7 @@ public class Boundry
 public class RoomGenerator {
     public int minCorridorLength = 3;
     public int maxCorridorLength = 8;
+    public int maxRoomPortals = 3;
 
     public List<Boundry> boundries;
     public List<Room> rooms;
@@ -107,7 +109,7 @@ public class RoomGenerator {
     public void createMap()
     {
         init();
-        Rect objectiveRoom = new Rect(2, 2, 2, 2);
+        Rect objectiveRoom = new Rect(2, 2, 4, 4);
         createRoom(objectiveRoom);
         createCorridors();
 
@@ -180,27 +182,6 @@ public class RoomGenerator {
         return squares;
     }
 
-    private void connectCorridors()
-    {
-        forEachCell((x, y) =>
-        {
-            Cell currentCell = map[x, y];
-            forEachAdjacentCell(currentCell, (adjacentCell, dir) =>
-            {
-                if (adjacentCell == null ||
-                    currentCell.room.transitions.Contains(adjacentCell.room) ||
-                    currentCell.room == adjacentCell.room ||
-                    currentCell.room.transitions.Count > 2)
-                {
-                    return;
-                }
-                currentCell.room.transitions.Add(adjacentCell.room);
-                currentCell.transitions.Add(dir);
-
-            });
-        });
-    }
-
     private void determineAdjacentRooms()
     {
         forEachCell((x, y) =>
@@ -221,21 +202,36 @@ public class RoomGenerator {
     {
         HashSet<Room> accessibleRooms = new HashSet<Room>();
         accessibleRooms.Add(rooms[0]);
+
+        bool boundryAdded = true;
         while(accessibleRooms.Count < rooms.Count)
         {
+            boundryAdded = false;
             HashSet<Room> newRooms = new HashSet<Room>();
             foreach (Room room in accessibleRooms)
             {
                 foreach (Boundry boundry in boundries)
                 {
-                    if(boundry.Involves(room) && !accessibleRooms.Contains(boundry.OtherRoom(room))) {
-                        boundry.type = Boundry.Type.portal;
-                        newRooms.Add(boundry.OtherRoom(room));
-                        break;
+                    if(boundry.Involves(room)) {
+                        Room otherRoom = boundry.OtherRoom(room);
+                        if (!accessibleRooms.Contains(otherRoom) && room.portalCount < maxRoomPortals && otherRoom.portalCount < maxRoomPortals)
+                        {
+                            boundry.type = Boundry.Type.portal;
+                            newRooms.Add(otherRoom);
+                            room.portalCount++;
+                            otherRoom.portalCount++;
+                            boundryAdded = true;
+                            break;
+                        }
                     }
                 }
             }
             accessibleRooms.UnionWith(newRooms);
+            if(!boundryAdded)
+            {
+                Debug.Log("Boundry failed to be found, aborting");
+                break;
+            }
         }
     }
 
