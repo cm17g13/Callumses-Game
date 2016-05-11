@@ -87,6 +87,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private Vector3 m_GroundContactNormal;
         private bool m_Jump, m_PreviouslyGrounded, m_Jumping, m_IsGrounded;
 
+        public bool isLocked = true;
+
 
         public Vector3 Velocity
         {
@@ -121,6 +123,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_RigidBody = GetComponent<Rigidbody>();
             m_Capsule = GetComponent<CapsuleCollider>();
             mouseLook.Init (transform, cam.transform);
+            Cursor.lockState = CursorLockMode.Locked;
             Screen.lockCursor = true;
             Cursor.visible = false;
         }
@@ -128,6 +131,16 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void Update()
         {
+            if (Input.GetKeyUp(KeyCode.Escape))
+            {
+                isLocked = !isLocked;
+                Cursor.lockState = CursorLockMode.None;
+            }
+            if (isLocked) Cursor.lockState = CursorLockMode.Locked;
+
+            Screen.lockCursor = isLocked;
+            Cursor.visible =!isLocked;
+
             RotateView();
 
             if (CrossPlatformInputManager.GetButtonDown("Jump") && !m_Jump)
