@@ -61,16 +61,30 @@ public class Boundry
     }
 }
 
+public class PatrolRoute
+{
+    public List<Cell> points = new List<Cell>();
+
+    public PatrolRoute(params Cell[] newPoints)
+    {
+        foreach(Cell point in newPoints)
+        {
+            points.Add(point);
+        }
+    }
+}
+
 public class RoomGenerator {
     public int minCorridorLength = 2;
     public int maxCorridorLength = 4;
     public int maxAccessPortals = 4;
     public int maxExtraPortals = 2;
 
+    public int mapSize;
     public List<Boundry> boundries;
     public List<Room> rooms;
     public Cell[,] map;
-    public int mapSize;
+    public List<PatrolRoute> patrols;
 
     public RoomGenerator(int newMapSize)
     {
@@ -103,6 +117,7 @@ public class RoomGenerator {
 
     public void init()
     {
+        patrols = new List<PatrolRoute>();
         boundries = new List<Boundry>();
         rooms = new List<Room>();
         map = new Cell[mapSize, mapSize];
@@ -119,8 +134,9 @@ public class RoomGenerator {
         determineAdjacentRooms();
         calculateBoundries();
 
-        //connectCorridors();
-        connectCorridors2();
+        connectCorridors();
+
+        calculatePatrols();
     }
 
     private void calculateBoundries()
@@ -201,7 +217,7 @@ public class RoomGenerator {
         });
     }
 
-    private void connectCorridors2()
+    private void connectCorridors()
     {
         //Shuffle boundries
         for (int i = 0; i < boundries.Count; i++)
@@ -365,5 +381,18 @@ public class RoomGenerator {
 
         //Debug.Log("Creating Corridor " + x + " " + y + " " + width + " " + height);
         createRoom(new Rect(x, y, width, height));
+    }
+
+    private void calculatePatrols()
+    {
+        int botQuantity = rooms.Count;
+        for(int i = 0; i < botQuantity; i++)
+        {
+            int startX = UnityEngine.Random.Range(0, map.GetLength(0));
+            int startY = UnityEngine.Random.Range(0, map.GetLength(1));
+            int targetX = UnityEngine.Random.Range(0, map.GetLength(0));
+            int targetY = UnityEngine.Random.Range(0, map.GetLength(1));
+            patrols.Add(new PatrolRoute(map[startX, startY], map[targetX, targetY]));
+        }
     }
 }

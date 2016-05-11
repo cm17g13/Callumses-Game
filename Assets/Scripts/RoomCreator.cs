@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 public class RoomCreator : MonoBehaviour {
     public GameObject wallBlock;
+    public GameObject patrolBot;
     public Vector3 origin;
     public float cellSizeInWorldUnits = 3;
     public float wallThickness = 0.1f;
@@ -20,6 +21,7 @@ public class RoomCreator : MonoBehaviour {
         generator.createMap();
         calculateOffsets();
         spawnArea();
+        spawnEnemies();
     }
 
     void calculateOffsets()
@@ -82,4 +84,27 @@ public class RoomCreator : MonoBehaviour {
         wall.transform.localScale = wallDimensions;
         return wall;
     }
+
+    void spawnEnemies()
+    {
+        foreach (PatrolRoute route in generator.patrols)
+        {
+            GameObject bot = spawnBot();
+            AI_Patrolling botAi = bot.GetComponent<AI_Patrolling>();
+            botAi.patrolPoints = new List<Transform>();
+            foreach (Cell point in route.points)
+            {
+                GameObject patrolPoint = new GameObject("Patrol Point");
+                patrolPoint.transform.position = gridToWorldPosition(point.x, point.y);
+                botAi.patrolPoints.Add(patrolPoint.transform);
+            }
+            bot.transform.position = botAi.patrolPoints[0].transform.position;
+        }
+    }
+
+    GameObject spawnBot()
+    {
+        return Instantiate(patrolBot);
+    }
+
 }

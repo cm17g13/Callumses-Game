@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class AI_Patrolling : MonoBehaviour {
-    public Transform[] patrolPoints;
+    public List<Transform> patrolPoints;
 
     protected int currentPatrolPoint = -1;
     protected int patrolPointModifier = 1;
@@ -33,7 +34,7 @@ public class AI_Patrolling : MonoBehaviour {
     Transform GetNextPoint()
     {
         currentPatrolPoint += patrolPointModifier;
-        if (currentPatrolPoint >= patrolPoints.Length || currentPatrolPoint < 0)
+        if (currentPatrolPoint >= patrolPoints.Count || currentPatrolPoint < 0)
         {
             patrolPointModifier = -patrolPointModifier;
             currentPatrolPoint += 2 * patrolPointModifier;
@@ -43,7 +44,7 @@ public class AI_Patrolling : MonoBehaviour {
 
     void GoToNextPoint()
     {
-        if(patrolPoints.Length == 0) { return; }
+        if(patrolPoints.Count == 0) { return; }
         agent.destination = GetNextPoint().position;
         
     }
