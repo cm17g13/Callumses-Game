@@ -153,12 +153,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 m_Jump = true;
             }
 
-            if (CrossPlatformInputManager.GetButtonDown("Crouch") && !m_CrouchPressed)
+            if (Input.GetKeyDown(KeyCode.LeftControl) && !m_CrouchPressed)
             {
                 m_CrouchPressed = true;
             }
 
-            if (CrossPlatformInputManager.GetButtonUp("Crouch") && m_CrouchPressed)
+            if (Input.GetKeyUp(KeyCode.LeftControl) && m_CrouchPressed)
             {
                 m_CrouchPressed = false;
             }
@@ -207,13 +207,13 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
                 if (m_CrouchPressed && !m_Crouching)
                 {
-                    m_RigidBody.transform.localScale.y *= 0.5;
+                    m_RigidBody.transform.localPosition += new Vector3(0, -1.2F, 0); ;
                     m_Crouching = true;
                 }
 
                 if (!m_CrouchPressed && m_Crouching)
                 {
-                    m_RigidBody.transform.localScale.y *= 2;
+                    m_RigidBody.transform.localPosition += new Vector3(0, 0.1F, 0); ;
                     m_Crouching = false;
                 }
 
