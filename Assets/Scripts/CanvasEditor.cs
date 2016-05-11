@@ -11,23 +11,31 @@ public class CanvasEditor : MonoBehaviour {
         text = GetComponent<Text>();
         var objects = GameObject.FindGameObjectsWithTag("Bot");
         var objectCount = objects.Length;
-        int count = 0;
+        AI_Patrolling.State highestRecordedState = AI_Patrolling.State.Passive;
+
         foreach (var obj in objects)
         {
-            count++;
-            //ScriptName sn = 
-            //obj.GetComponent<AI_Patrolling>().Detected();
-            if (obj.GetComponent<AI_Patrolling>().Detected())
+            if(obj.GetComponent<AI_Patrolling>().state > highestRecordedState)
             {
+                highestRecordedState = obj.GetComponent<AI_Patrolling>().state;
+            }
+
+        }
+
+        switch(highestRecordedState)
+        {
+            case AI_Patrolling.State.Detected:
                 text.text = "Detected";
                 text.color = Color.red;
-                count = 0;
-            }
-        }
-        if (count == objectCount)
-        {
-            text.text = "Concealed";
-            text.color = Color.grey;
+                break;
+            case AI_Patrolling.State.Alerted:
+                text.text = "Alerted";
+                text.color = Color.yellow;
+                break;
+            case AI_Patrolling.State.Passive:
+                text.text = "Concealed";
+                text.color = Color.grey;
+                break;
         }
     }
 

@@ -19,7 +19,10 @@ public class AI_Patrolling : MonoBehaviour {
     public float speed = 20;
     public float time = 1;
     public float shotTime = 1;
-    public bool isDetected = false;
+    public State state = State.Passive;
+    public bool chasing = false;
+
+    public enum State { Detected = 3, Alerted = 2, Passive = 1}
 
     // Use this for initialization
     void Start () {
@@ -47,6 +50,7 @@ public class AI_Patrolling : MonoBehaviour {
     void GoToPlayer()
     {
         agent.destination = player.transform.position;
+        chasing = true;
     }
 
     void shoot()
@@ -77,22 +81,32 @@ public class AI_Patrolling : MonoBehaviour {
 
     public bool Detected()
     {
-        return isDetected;
+        return state == State.Detected;
     }
 
     // Update is called once per frame
     void Update () {
 
-        if(InLineOfSight()) {
+        bool canSee = InLineOfSight();
+        if (canSee)
+        {
             GoToPlayer();
-            this.isDetected = true;
+            this.state = State.Detected;
             time = time + Time.deltaTime;
-            if (time > shotTime) {
+            if (time > shotTime)
+            {
                 shoot();
                 time = 0;
             }
-        } else if (agent.remainingDistance < 1f) {
-            this.isDetected = false;
+        }
+        else if(chasing)
+        {
+            this.state = State.Alerted;
+        }
+
+        if (!canSee && agent.remainingDistance < 1f) {
+            chasing = false;
+            this.state = State.Passive;
             GoToNextPoint();
             time = 0;
         }	
