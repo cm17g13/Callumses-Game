@@ -19,6 +19,7 @@ public class AI_Patrolling : MonoBehaviour {
     public float speed = 20;
     public float time = 1;
     public float shotTime = 1;
+    [SerializeField]
     public State state = State.Passive;
     public bool chasing = false;
 
