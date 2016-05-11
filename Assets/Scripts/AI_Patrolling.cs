@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class AI_Patrolling : MonoBehaviour {
-    public Transform[] patrolPoints;
+    public List<Transform> patrolPoints;
 
     protected int currentPatrolPoint = -1;
     protected int patrolPointModifier = 1;
@@ -14,12 +15,13 @@ public class AI_Patrolling : MonoBehaviour {
     public float fov = 60;
     public float viewDistance = 15;
     private RaycastHit hit;
-    public GameObject player;
+    private GameObject player;
 
     public Rigidbody projectile;
     public float speed = 20;
     public float time = 1;
     public float shotTime = 1;
+    [SerializeField]
     public State state = State.Passive;
     public bool chasing = false;
 
@@ -28,12 +30,13 @@ public class AI_Patrolling : MonoBehaviour {
     // Use this for initialization
     void Start () {
         agent = GetComponent<NavMeshAgent>();
+        player = GameObject.FindWithTag("Player");
 	}
 
     Transform GetNextPoint()
     {
         currentPatrolPoint += patrolPointModifier;
-        if (currentPatrolPoint >= patrolPoints.Length || currentPatrolPoint < 0)
+        if (currentPatrolPoint >= patrolPoints.Count || currentPatrolPoint < 0)
         {
             patrolPointModifier = -patrolPointModifier;
             currentPatrolPoint += 2 * patrolPointModifier;
@@ -43,7 +46,7 @@ public class AI_Patrolling : MonoBehaviour {
 
     void GoToNextPoint()
     {
-        if(patrolPoints.Length == 0) { return; }
+        if(patrolPoints.Count == 0) { return; }
         agent.destination = GetNextPoint().position;
         
     }
@@ -109,17 +112,18 @@ public class AI_Patrolling : MonoBehaviour {
                 shoot();
                 time = 0;
             }
+			Debug.Log("Watching");
         }
         else if(chasing)
         {
             this.state = State.Alerted;
         }
 
-        if (!canSee && agent.remainingDistance < 1f) {
+		if (!canSee && agent.remainingDistance < 1f && !agent.pathPending) {
             chasing = false;
             this.state = State.Passive;
-            GoToNextPoint();
             time = 0;
+			GoToNextPoint();
         }	
 	}
 }

@@ -14,9 +14,11 @@ public enum Dir
 
 public class Room
 {
-    public HashSet<Room> transitions = new HashSet<Room>();
     public HashSet<Room> adjacentRooms = new HashSet<Room>();
     public List<Cell> cells = new List<Cell>();
+
+    public int accessPortalCount = 0;
+    public int extraPortalCount = 0;
 }
 
 public class Cell
@@ -29,8 +31,9 @@ public class Cell
 
 public class Boundry
 {
-    public Cell cell1;
-    public Cell cell2;
+    public Cell cell1, cell2;
+    public Room room1 { get { return cell1.room;  } }
+    public Room room2 { get { return cell2.room; } }
     public Dir dir;
     public Type type = Type.wall;
 
@@ -58,14 +61,30 @@ public class Boundry
     }
 }
 
-public class RoomGenerator {
-    public int minCorridorLength = 3;
-    public int maxCorridorLength = 8;
+public class PatrolRoute
+{
+    public List<Cell> points = new List<Cell>();
 
+    public PatrolRoute(params Cell[] newPoints)
+    {
+        foreach(Cell point in newPoints)
+        {
+            points.Add(point);
+        }
+    }
+}
+
+public class RoomGenerator {
+    public int minCorridorLength = 2;
+    public int maxCorridorLength = 4;
+    public int maxAccessPortals = 4;
+    public int maxExtraPortals = 2;
+
+    public int mapSize;
     public List<Boundry> boundries;
     public List<Room> rooms;
     public Cell[,] map;
-    public int mapSize;
+    public List<PatrolRoute> patrols;
 
     public RoomGenerator(int newMapSize)
     {
@@ -98,6 +117,7 @@ public class RoomGenerator {
 
     public void init()
     {
+        patrols = new List<PatrolRoute>();
         boundries = new List<Boundry>();
         rooms = new List<Room>();
         map = new Cell[mapSize, mapSize];
@@ -107,15 +127,16 @@ public class RoomGenerator {
     public void createMap()
     {
         init();
-        Rect objectiveRoom = new Rect(2, 2, 2, 2);
+        Rect objectiveRoom = new Rect(2, 2, 4, 4);
         createRoom(objectiveRoom);
         createCorridors();
 
         determineAdjacentRooms();
         calculateBoundries();
 
-        //connectCorridors();
-        connectCorridors2();
+        connectCorridors();
+
+        calculatePatrols();
     }
 
     private void calculateBoundries()
@@ -180,27 +201,6 @@ public class RoomGenerator {
         return squares;
     }
 
-    private void connectCorridors()
-    {
-        forEachCell((x, y) =>
-        {
-            Cell currentCell = map[x, y];
-            forEachAdjacentCell(currentCell, (adjacentCell, dir) =>
-            {
-                if (adjacentCell == null ||
-                    currentCell.room.transitions.Contains(adjacentCell.room) ||
-                    currentCell.room == adjacentCell.room ||
-                    currentCell.room.transitions.Count > 2)
-                {
-                    return;
-                }
-                currentCell.room.transitions.Add(adjacentCell.room);
-                currentCell.transitions.Add(dir);
-
-            });
-        });
-    }
-
     private void determineAdjacentRooms()
     {
         forEachCell((x, y) =>
@@ -217,25 +217,55 @@ public class RoomGenerator {
         });
     }
 
-    private void connectCorridors2()
+    private void connectCorridors()
     {
+        //Shuffle boundries
+        for (int i = 0; i < boundries.Count; i++)
+        {
+            int swapPosition = UnityEngine.Random.Range(0, boundries.Count);
+            Boundry temp = boundries[swapPosition];
+            boundries[swapPosition] = boundries[i];
+            boundries[i] = temp;
+        }
+
         HashSet<Room> accessibleRooms = new HashSet<Room>();
         accessibleRooms.Add(rooms[0]);
+
+        bool boundryAdded = true;
         while(accessibleRooms.Count < rooms.Count)
         {
-            HashSet<Room> newRooms = new HashSet<Room>();
-            foreach (Room room in accessibleRooms)
+            boundryAdded = false;
+            foreach (Boundry boundry in boundries)
             {
-                foreach (Boundry boundry in boundries)
-                {
-                    if(boundry.Involves(room) && !accessibleRooms.Contains(boundry.OtherRoom(room))) {
+                Room room = (accessibleRooms.Contains(boundry.cell1.room))? boundry.cell1.room : ((accessibleRooms.Contains(boundry.cell2.room))? boundry.cell2.room : null);
+                if(room != null) {
+                    Room otherRoom = boundry.OtherRoom(room);
+                    if (room.accessPortalCount < maxAccessPortals && otherRoom.accessPortalCount < maxAccessPortals && !accessibleRooms.Contains(otherRoom))
+                    {
                         boundry.type = Boundry.Type.portal;
-                        newRooms.Add(boundry.OtherRoom(room));
-                        break;
+                        accessibleRooms.Add(otherRoom);
+                        room.accessPortalCount++;
+                        otherRoom.accessPortalCount++;
+                        boundryAdded = true;
+                        //break;
+                    }
+                    
+                    if (room.extraPortalCount < maxExtraPortals && otherRoom.extraPortalCount < maxExtraPortals)
+                    {
+                        boundry.type = Boundry.Type.portal;
+                        accessibleRooms.Add(otherRoom);
+                        room.extraPortalCount++;
+                        otherRoom.extraPortalCount++;
+                        boundryAdded = true;
+                        //break;
                     }
                 }
             }
-            accessibleRooms.UnionWith(newRooms);
+            if(!boundryAdded)
+            {
+                Debug.Log("Boundry failed to be found, aborting");
+                break;
+            }
         }
     }
 
@@ -351,5 +381,18 @@ public class RoomGenerator {
 
         //Debug.Log("Creating Corridor " + x + " " + y + " " + width + " " + height);
         createRoom(new Rect(x, y, width, height));
+    }
+
+    private void calculatePatrols()
+    {
+        int botQuantity = rooms.Count/12;
+        for(int i = 0; i < botQuantity; i++)
+        {
+            int startX = UnityEngine.Random.Range(0, map.GetLength(0));
+            int startY = UnityEngine.Random.Range(0, map.GetLength(1));
+            int targetX = UnityEngine.Random.Range(0, map.GetLength(0));
+            int targetY = UnityEngine.Random.Range(0, map.GetLength(1));
+            patrols.Add(new PatrolRoute(map[startX, startY], map[targetX, targetY]));
+        }
     }
 }
