@@ -30,8 +30,9 @@ public class Cell
 
 public class Boundry
 {
-    public Cell cell1;
-    public Cell cell2;
+    public Cell cell1, cell2;
+    public Room room1 { get { return cell1.room;  } }
+    public Room room2 { get { return cell2.room; } }
     public Dir dir;
     public Type type = Type.wall;
 
@@ -62,7 +63,7 @@ public class Boundry
 public class RoomGenerator {
     public int minCorridorLength = 3;
     public int maxCorridorLength = 8;
-    public int maxRoomPortals = 3;
+    public int maxRoomPortals = 4;
 
     public List<Boundry> boundries;
     public List<Room> rooms;
@@ -207,26 +208,32 @@ public class RoomGenerator {
         while(accessibleRooms.Count < rooms.Count)
         {
             boundryAdded = false;
-            HashSet<Room> newRooms = new HashSet<Room>();
-            foreach (Room room in accessibleRooms)
+            foreach (Boundry boundry in boundries)
             {
-                foreach (Boundry boundry in boundries)
-                {
-                    if(boundry.Involves(room)) {
-                        Room otherRoom = boundry.OtherRoom(room);
-                        if (!accessibleRooms.Contains(otherRoom) && room.portalCount < maxRoomPortals && otherRoom.portalCount < maxRoomPortals)
-                        {
-                            boundry.type = Boundry.Type.portal;
-                            newRooms.Add(otherRoom);
-                            room.portalCount++;
-                            otherRoom.portalCount++;
-                            boundryAdded = true;
-                            break;
-                        }
+                Room room = (accessibleRooms.Contains(boundry.cell1.room))? boundry.cell1.room : ((accessibleRooms.Contains(boundry.cell2.room))? boundry.cell2.room : null);
+                if(room != null) {
+                    Room otherRoom = boundry.OtherRoom(room);
+                    if (room.portalCount < maxRoomPortals && otherRoom.portalCount < maxRoomPortals && !accessibleRooms.Contains(otherRoom))
+                    {
+                        boundry.type = Boundry.Type.portal;
+                        accessibleRooms.Add(otherRoom);
+                        room.portalCount++;
+                        otherRoom.portalCount++;
+                        boundryAdded = true;
+                        break;
                     }
+                    /*
+                    if (room.portalCount < maxRoomPortals + 1 && otherRoom.portalCount < maxRoomPortals + 1)
+                    {
+                        boundry.type = Boundry.Type.portal;
+                        accessibleRooms.Add(otherRoom);
+                        room.portalCount++;
+                        otherRoom.portalCount++;
+                        boundryAdded = true;
+                        break;
+                    }*/
                 }
             }
-            accessibleRooms.UnionWith(newRooms);
             if(!boundryAdded)
             {
                 Debug.Log("Boundry failed to be found, aborting");
