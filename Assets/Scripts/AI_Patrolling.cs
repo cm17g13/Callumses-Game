@@ -10,6 +10,7 @@ public class AI_Patrolling : MonoBehaviour {
 
     protected NavMeshAgent agent;
 
+    public float health = 10;
     public float fov = 60;
     public float viewDistance = 15;
     private RaycastHit hit;
@@ -71,7 +72,6 @@ public class AI_Patrolling : MonoBehaviour {
             {
                 if (hit.transform.tag == "Player")
                 {
-                    Debug.Log("Can see player");
                     return true;
                 }
             }
@@ -82,6 +82,17 @@ public class AI_Patrolling : MonoBehaviour {
     public bool Detected()
     {
         return state == State.Detected;
+    }
+
+    public void Hit(float damage)
+    {
+        Debug.Log(this.health);
+        this.health -= damage;
+        Debug.Log(this.health);
+        if (this.health <= 0)
+        {
+            Destroy(gameObject);
+        } 
     }
 
     // Update is called once per frame

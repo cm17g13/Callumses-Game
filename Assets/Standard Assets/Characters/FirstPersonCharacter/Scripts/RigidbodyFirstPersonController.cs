@@ -85,7 +85,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private CapsuleCollider m_Capsule;
         private float m_YRotation;
         private Vector3 m_GroundContactNormal;
-        private bool m_Jump, m_PreviouslyGrounded, m_Jumping, m_IsGrounded;
+        private bool m_Jump, m_PreviouslyGrounded, m_Jumping, m_IsGrounded, m_CrouchPressed, m_Crouching;
 
         public bool isLocked = true;
 
@@ -103,6 +103,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public bool Jumping
         {
             get { return m_Jumping; }
+        }
+
+        public bool Crouching
+        {
+            get { return m_CrouchPressed; }
         }
 
         public bool Running
@@ -147,6 +152,16 @@ namespace UnityStandardAssets.Characters.FirstPerson
             {
                 m_Jump = true;
             }
+
+            if (CrossPlatformInputManager.GetButtonDown("Crouch") && !m_CrouchPressed)
+            {
+                m_CrouchPressed = true;
+            }
+
+            if (CrossPlatformInputManager.GetButtonUp("Crouch") && m_CrouchPressed)
+            {
+                m_CrouchPressed = false;
+            }
         }
 
 
@@ -187,6 +202,21 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 {
                     m_RigidBody.Sleep();
                 }
+
+
+
+                if (m_CrouchPressed && !m_Crouching)
+                {
+                    m_RigidBody.transform.localScale.y *= 0.5;
+                    m_Crouching = true;
+                }
+
+                if (!m_CrouchPressed && m_Crouching)
+                {
+                    m_RigidBody.transform.localScale.y *= 2;
+                    m_Crouching = false;
+                }
+
             }
             else
             {
