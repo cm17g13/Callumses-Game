@@ -15,7 +15,7 @@ public class AI_Patrolling : MonoBehaviour {
     public float fov = 60;
     public float viewDistance = 15;
     private RaycastHit hit;
-    public GameObject player;
+    private GameObject player;
 
     public Rigidbody projectile;
     public float speed = 20;
@@ -30,6 +30,7 @@ public class AI_Patrolling : MonoBehaviour {
     // Use this for initialization
     void Start () {
         agent = GetComponent<NavMeshAgent>();
+        player = GameObject.FindWithTag("Player");
 	}
 
     Transform GetNextPoint()
