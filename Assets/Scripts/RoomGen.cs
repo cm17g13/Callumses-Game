@@ -59,6 +59,7 @@ public class Boundry
 }
 
 public class RoomGenerator {
+    public int minCorridorLength = 3;
     public int maxCorridorLength = 8;
 
     public List<Boundry> boundries;
@@ -340,7 +341,7 @@ public class RoomGenerator {
     private void spawnCorridor(Cell location)
     {
         Dir corridorDirection = getArbitraryFreeDirection(location.x, location.y);
-        int desiredLength = UnityEngine.Random.Range(1, maxCorridorLength);
+        int desiredLength = UnityEngine.Random.Range(minCorridorLength, maxCorridorLength);
         int actualLength = getMaxLengthInDirection(location.x, location.y, corridorDirection, desiredLength);
 
         int x = corridorDirection == Dir.West ? location.x - (actualLength - 1) : location.x;

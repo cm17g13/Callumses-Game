@@ -9,16 +9,18 @@ public class RoomCreator : MonoBehaviour {
     public float cellSizeInWorldUnits = 3;
     public float wallThickness = 0.1f;
     public float wallHeight = 3f;
+    public int worldSize = 10;
 
     private Dictionary<Dir, Vector3> offsets;
-    private RoomGenerator generator = new RoomGenerator(10);
+    private RoomGenerator generator;
 
 	// Use this for initialization
 	void Start () {
-        calculateOffsets();
+        generator = new RoomGenerator(worldSize);
         generator.createMap();
+        calculateOffsets();
         spawnArea();
-	}
+    }
 
     void calculateOffsets()
     {
@@ -38,12 +40,29 @@ public class RoomCreator : MonoBehaviour {
 
     void spawnArea()
     {
+        spawnAreaWalls();
         foreach (Boundry boundry in generator.boundries)
         {
             if (boundry.type == Boundry.Type.wall)
             {
                 spawnBoundry(boundry);
             }
+        }
+    }
+
+    void spawnAreaWalls()
+    {
+        int xMax = generator.map.GetLength(0) - 1;
+        int yMax = generator.map.GetLength(1) - 1;
+        for(int y = 0; y <= yMax; y++)
+        {
+            createWall(0, y, Dir.West);
+            createWall(xMax, y, Dir.East);
+        }
+        for(int x = 0; x <= xMax; x++)
+        {
+            createWall(x, 0, Dir.North);
+            createWall(x, yMax, Dir.South);
         }
     }
 
