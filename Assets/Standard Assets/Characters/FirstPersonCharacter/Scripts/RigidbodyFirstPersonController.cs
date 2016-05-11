@@ -205,7 +205,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
 
 
-                if (m_CrouchPressed && !m_Crouching)
+                if (m_CrouchPressed && !m_Crouching && !m_Jumping)
                 {
                     m_RigidBody.transform.localPosition += new Vector3(0, -1.2F, 0); ;
                     m_Crouching = true;
@@ -227,6 +227,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 }
             }
             m_Jump = false;
+        }
+
+        public void Death()
+        {
+            //Do a thing
         }
 
 

@@ -23,6 +23,8 @@ public class BotBulletScript : MonoBehaviour {
         }
         if (collision.gameObject.tag == "Player")
         {
+            //do more stuff here
+            //collision.gameObject.GetComponent<AI_Patrolling>().Hit(damage);
             Destroy(collision.gameObject);
         }
         Destroy(gameObject);
