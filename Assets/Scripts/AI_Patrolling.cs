@@ -112,17 +112,18 @@ public class AI_Patrolling : MonoBehaviour {
                 shoot();
                 time = 0;
             }
+			Debug.Log("Watching");
         }
         else if(chasing)
         {
             this.state = State.Alerted;
         }
 
-        if (!canSee && agent.remainingDistance < 1f) {
+		if (!canSee && agent.remainingDistance < 1f && !agent.pathPending) {
             chasing = false;
             this.state = State.Passive;
-            GoToNextPoint();
             time = 0;
+			GoToNextPoint();
         }	
 	}
 }

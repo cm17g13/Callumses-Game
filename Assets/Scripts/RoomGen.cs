@@ -385,7 +385,7 @@ public class RoomGenerator {
 
     private void calculatePatrols()
     {
-        int botQuantity = rooms.Count;
+        int botQuantity = rooms.Count/12;
         for(int i = 0; i < botQuantity; i++)
         {
             int startX = UnityEngine.Random.Range(0, map.GetLength(0));
