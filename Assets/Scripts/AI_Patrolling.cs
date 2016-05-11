@@ -19,6 +19,7 @@ public class AI_Patrolling : MonoBehaviour {
     public float speed = 20;
     public float time = 1;
     public float shotTime = 1;
+    public bool isDetected = false;
 
     // Use this for initialization
     void Start () {
@@ -74,17 +75,24 @@ public class AI_Patrolling : MonoBehaviour {
         return false;
     }
 
+    public bool Detected()
+    {
+        return isDetected;
+    }
+
     // Update is called once per frame
     void Update () {
 
         if(InLineOfSight()) {
             GoToPlayer();
+            this.isDetected = true;
             time = time + Time.deltaTime;
             if (time > shotTime) {
                 shoot();
                 time = 0;
             }
         } else if (agent.remainingDistance < 1f) {
+            this.isDetected = false;
             GoToNextPoint();
             time = 0;
         }	
