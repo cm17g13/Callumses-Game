@@ -12,26 +12,31 @@ public enum Dir
     West
 }
 
+public class Room
+{
+    public HashSet<Room> transitions = new HashSet<Room>();
+    public HashSet<Room> adjacentRooms = new HashSet<Room>();
+    public List<Cell> cells = new List<Cell>();
+}
+
 public class Cell
 {
-    public int roomId = 0;
-    public bool isAssigned = false;
+    public Room room = null;
+    public bool isAssigned { get { return room != null; } }
+    public List<Dir> transitions = new List<Dir>();
     public int x, y;
 }
 
 public class RoomGenerator {
-    public int maxCorridorLength = 5;
+    public int maxCorridorLength = 8;
 
+    public List<Room> rooms;
     public Cell[,] map;
     public int mapSize;
-
-    private int currentRoomId = 0;
 
     public RoomGenerator(int newMapSize)
     {
         mapSize = newMapSize;
-        map = new Cell[mapSize, mapSize];
-        forEachCell((x, y) => map[x, y] = new Cell() { x = x, y = y });
     }
 
     public delegate void GridIterCallback(int x, int y);
@@ -46,23 +51,53 @@ public class RoomGenerator {
         }
     }
 
+    public delegate void AdjacentCellCallback(Cell adjacentCell, Dir dir);
+    public void forEachAdjacentCell(Cell currentCell, AdjacentCellCallback callback)
+    {
+        foreach (Dir dir in Enum.GetValues(typeof(Dir)))
+        {
+            if(dir == Dir.None) { continue; }
+            Cell adjacentCell = getCellInDirection(currentCell.x, currentCell.y, dir);
+            callback(adjacentCell, dir);
+        }
+    }
+
+    public void init()
+    {
+        rooms = new List<Room>();
+        map = new Cell[mapSize, mapSize];
+        forEachCell((x, y) => map[x, y] = new Cell() { x = x, y = y });
+    }
+
+    public void createMap()
+    {
+        init();
+        Rect objectiveRoom = new Rect(2, 2, 5, 5);
+        createRoom(objectiveRoom);
+        spawnCorridors();
+        //connectCorridors();
+        connectCorridors2();
+    }
+
     //Creates a room by assigning it in the map and allocating north and west walls.
     //Should work, despite not allocation south and east, as long as all squares allocated.
-    public void createRoom(Rect room)
+    public void createRoom(Rect dimensions)
     {
-        currentRoomId++;
 
-        int xMin = (int)room.x;
-        int yMin = (int)room.y;
-        int xMax = (int)room.xMax - 1;
-        int yMax = (int)room.yMax - 1;
+        int xMin = (int)dimensions.x;
+        int yMin = (int)dimensions.y;
+        int xMax = (int)dimensions.xMax - 1;
+        int yMax = (int)dimensions.yMax - 1;
+
+        Room room = new Room();
+        rooms.Add(room);
 
         for(int x = xMin; x <= xMax; x++)
         {
             for(int y = yMin; y <= yMax; y++)
             {
-                map[x, y].roomId = currentRoomId;
-                map[x, y].isAssigned = true;
+                map[x, y].room = room;
+                room.cells.Add(map[x, y]);
             }
         }
     }
@@ -70,7 +105,9 @@ public class RoomGenerator {
     public void useTestData()
     {
         mapSize = 2;
-        map = new Cell[2, 2] { { new Cell() { x = 0, y = 0, roomId = 1 }, new Cell() { x = 0, y = 1, roomId = 1 } }, { new Cell() { x = 1, y = 0, roomId = 2 }, new Cell() { x = 1, y = 1, roomId = 2 } } };
+        Room roomOne = new Room();
+        Room roomTwo = new Room();
+        map = new Cell[2, 2] { { new Cell() { x = 0, y = 0, room = roomOne }, new Cell() { x = 0, y = 1, room = roomOne } }, { new Cell() { x = 1, y = 0, room = roomTwo }, new Cell() { x = 1, y = 1, room = roomTwo } } };
     }
     
     public List<Cell> getUnassignedSquares()
@@ -86,20 +123,76 @@ public class RoomGenerator {
         return squares;
     }
 
-    public void createMap()
-    {
-        Rect objectiveRoom = new Rect(2, 2, 5, 5);
-        createRoom(objectiveRoom);
-        spawnCorridors();
-        connectCorridors();
-    }
-
     private void connectCorridors()
     {
         forEachCell((x, y) =>
         {
-            int adjacentRooms = getAdjacentRoomCount(x, y);
+            Cell currentCell = map[x, y];
+            forEachAdjacentCell(currentCell, (adjacentCell, dir) =>
+            {
+                if (adjacentCell == null ||
+                    currentCell.room.transitions.Contains(adjacentCell.room) ||
+                    currentCell.room == adjacentCell.room ||
+                    currentCell.room.transitions.Count > 2)
+                {
+                    return;
+                }
+                currentCell.room.transitions.Add(adjacentCell.room);
+                currentCell.transitions.Add(dir);
+
+            });
         });
+    }
+
+    private void determineAdjacentRooms()
+    {
+        forEachCell((x, y) =>
+        {
+            Cell currentCell = map[x, y];
+            forEachAdjacentCell(currentCell, (adjacentCell, dir) =>
+            {
+                if(adjacentCell != null && adjacentCell.room != currentCell.room)
+                {
+                    currentCell.room.adjacentRooms.Add(adjacentCell.room);
+                    adjacentCell.room.adjacentRooms.Add(currentCell.room);
+                }
+            });
+        });
+    }
+
+    private void connectCorridors2()
+    {
+        determineAdjacentRooms();
+        HashSet<Room> accessibleRooms = new HashSet<Room>();
+        accessibleRooms.Add(rooms[0]);
+        while(accessibleRooms.Count < rooms.Count)
+        {
+            HashSet<Room> newRooms = new HashSet<Room>();
+            foreach (Room room in accessibleRooms)
+            {
+                foreach(Room adjacentRoom in room.adjacentRooms)
+                {
+                    if(!accessibleRooms.Contains(adjacentRoom))
+                    {
+                        foreach(Cell cell in room.cells)
+                        {
+                            forEachAdjacentCell(cell, (adjacentCell, dir) =>
+                            {
+                                if (adjacentCell != null && adjacentCell.room == adjacentRoom && !newRooms.Contains(adjacentRoom))
+                                {
+                                    Debug.Log("ADding transition");
+                                    cell.transitions.Add(dir);
+                                    Dir opposite = (dir == Dir.North) ? Dir.South : (dir == Dir.South) ? Dir.North : (dir == Dir.West)? Dir.East : (dir == Dir.East)? Dir.West : Dir.None;
+                                    adjacentCell.transitions.Add(opposite);
+                                    newRooms.Add(adjacentRoom);
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+            accessibleRooms.UnionWith(newRooms);
+        }
     }
 
     private void spawnCorridors()
@@ -154,11 +247,10 @@ public class RoomGenerator {
     {
         int count = 0;
         Cell currentCell = map[x, y];
-        foreach (Dir dir in Enum.GetValues(typeof(Dir)))
+        forEachAdjacentCell(currentCell, (adjacentCell, dir) =>
         {
-            Cell adjacentCell = getCellInDirection(x, y, dir);
-            count = (adjacentCell != null && adjacentCell.roomId == currentCell.roomId) ? count : count + 1;
-        }
+            count = (adjacentCell != null && adjacentCell.room == currentCell.room) ? count : count + 1;
+        });
         return count;
     }
 

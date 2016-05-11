@@ -51,18 +51,14 @@ public class RoomCreator : MonoBehaviour {
     {
         Cell currentCell = generator.map[x, y];
 
-        foreach(Dir dir in Enum.GetValues(typeof(Dir)))
+        generator.forEachAdjacentCell(currentCell, (adjacentCell, dir) =>
         {
-            Cell adjacentCell = generator.getCellInDirection(x, y, dir);
-            if (dir != Dir.None && (adjacentCell == null || adjacentCell.roomId != currentCell.roomId))
+            if (adjacentCell == null || adjacentCell.room != currentCell.room)
             {
-                if (generator.getAdjacentRoomCount(x, y) >= 3 && adjacentCell != null && adjacentCell.roomId != currentCell.roomId && UnityEngine.Random.value < 0.8)
-                {
-                    continue;
-                }
-                createWall(x, y, dir);
+                if(currentCell.transitions.Contains(dir)) { return; }
+                createWall(currentCell.x, currentCell.y, dir);
             }
-        }
+        });
     }
 
     GameObject createWall(int x, int y, Dir wallDirection)
