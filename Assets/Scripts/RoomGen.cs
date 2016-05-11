@@ -17,7 +17,8 @@ public class Room
     public HashSet<Room> adjacentRooms = new HashSet<Room>();
     public List<Cell> cells = new List<Cell>();
 
-    public int portalCount = 0;
+    public int accessPortalCount = 0;
+    public int extraPortalCount = 0;
 }
 
 public class Cell
@@ -61,9 +62,10 @@ public class Boundry
 }
 
 public class RoomGenerator {
-    public int minCorridorLength = 3;
-    public int maxCorridorLength = 8;
-    public int maxRoomPortals = 4;
+    public int minCorridorLength = 2;
+    public int maxCorridorLength = 4;
+    public int maxAccessPortals = 4;
+    public int maxExtraPortals = 4;
 
     public List<Boundry> boundries;
     public List<Room> rooms;
@@ -137,6 +139,14 @@ public class RoomGenerator {
                 boundries.Add(new Boundry(currentCell, southCell, Dir.South));
             }
         });
+
+        for (int i = 0; i < boundries.Count; i++)
+        {
+            int swapPosition = UnityEngine.Random.Range(0, boundries.Count);
+            Boundry temp = boundries[swapPosition];
+            boundries[swapPosition] = boundries[i];
+            boundries[i] = temp;
+        }
     }
 
     //Creates a room by assigning it in the map and allocating north and west walls.
@@ -213,25 +223,25 @@ public class RoomGenerator {
                 Room room = (accessibleRooms.Contains(boundry.cell1.room))? boundry.cell1.room : ((accessibleRooms.Contains(boundry.cell2.room))? boundry.cell2.room : null);
                 if(room != null) {
                     Room otherRoom = boundry.OtherRoom(room);
-                    if (room.portalCount < maxRoomPortals && otherRoom.portalCount < maxRoomPortals && !accessibleRooms.Contains(otherRoom))
+                    if (room.accessPortalCount < maxAccessPortals && otherRoom.accessPortalCount < maxAccessPortals && !accessibleRooms.Contains(otherRoom))
                     {
                         boundry.type = Boundry.Type.portal;
                         accessibleRooms.Add(otherRoom);
-                        room.portalCount++;
-                        otherRoom.portalCount++;
+                        room.accessPortalCount++;
+                        otherRoom.accessPortalCount++;
                         boundryAdded = true;
                         break;
                     }
-                    /*
-                    if (room.portalCount < maxRoomPortals + 1 && otherRoom.portalCount < maxRoomPortals + 1)
+                    
+                    if (room.extraPortalCount < 4 && otherRoom.extraPortalCount < 4)
                     {
                         boundry.type = Boundry.Type.portal;
                         accessibleRooms.Add(otherRoom);
-                        room.portalCount++;
-                        otherRoom.portalCount++;
+                        room.extraPortalCount++;
+                        otherRoom.extraPortalCount++;
                         boundryAdded = true;
                         break;
-                    }*/
+                    }
                 }
             }
             if(!boundryAdded)
