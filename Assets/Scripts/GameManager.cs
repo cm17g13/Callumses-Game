@@ -65,6 +65,7 @@ public class GameManager : MonoBehaviour {
     public void OnObjectiveComplete(Objective objective)
     {
         Debug.Log("Objective accomplished");
+        Application.LoadLevel("Game");
     }
 	
 	// Update is called once per frame
