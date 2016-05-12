@@ -2,7 +2,6 @@
 using System.Collections;
 
 public class GameManager : MonoBehaviour {
-    public int worldSize = 10;
     public RoomGenerator generator;
     public RoomCreator creator;
 
