@@ -6,6 +6,7 @@ using System.Collections.Generic;
 public class RoomCreator : MonoBehaviour {
     public GameObject wallBlock;
     public GameObject patrolBot;
+    public GameObject objectivePrefab;
     public Vector3 origin;
     public float cellSizeInWorldUnits = 3;
     public float wallThickness = 0.1f;
@@ -20,6 +21,7 @@ public class RoomCreator : MonoBehaviour {
         calculateOffsets();
         spawnArea();
         spawnEnemies();
+        spawnObjectives();
     }
 
     void calculateOffsets()
@@ -103,6 +105,16 @@ public class RoomCreator : MonoBehaviour {
     GameObject spawnBot()
     {
         return Instantiate(patrolBot);
+    }
+
+    void spawnObjectives()
+    {
+        foreach(Cell objectiveLoc in generator.objectives)
+        {
+            Vector3 objectivePos = gridToWorldPosition(objectiveLoc.x, objectiveLoc.y);
+            objectivePos.y = origin.y;
+            Instantiate(objectivePrefab, gridToWorldPosition(objectiveLoc.x, objectiveLoc.y), Quaternion.identity);
+        }
     }
 
 }

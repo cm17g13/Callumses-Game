@@ -14,6 +14,11 @@ public enum Dir
 
 public class Room
 {
+    public int x, y;
+    public int width, height;
+
+    public enum Type { normal, objective }
+    public Type type = Type.normal;
     public HashSet<Room> adjacentRooms = new HashSet<Room>();
     public List<Cell> cells = new List<Cell>();
 
@@ -86,6 +91,7 @@ public class RoomGenerator : MonoBehaviour {
     public Cell[,] map;
     public List<PatrolRoute> patrols;
     public Cell spawnCell;
+    public List<Cell> objectives;
 
     public delegate void GridIterCallback(int x, int y);
     public void forEachCell(GridIterCallback callback)
@@ -113,6 +119,7 @@ public class RoomGenerator : MonoBehaviour {
 
     public void init()
     {
+        objectives = new List<Cell>();
         patrols = new List<PatrolRoute>();
         boundries = new List<Boundry>();
         rooms = new List<Room>();
@@ -123,14 +130,16 @@ public class RoomGenerator : MonoBehaviour {
     public void createMap()
     {
         init();
-        Rect objectiveRoom = new Rect(2, 2, 4, 4);
-        createRoom(objectiveRoom);
+        Rect objectiveRoom = new Rect(mapSize-4, mapSize-4, 4, 4);
+        Room objRoom = createRoom(objectiveRoom);
+        objRoom.type = Room.Type.objective;
         createCorridors();
         determineAdjacentRooms();
         calculateBoundries();
         connectCorridors();
-        calculatePatrols();
 
+        calculateObjectiveLocations();
+        calculatePatrols();
         selectSpawnCell();
     }
 
@@ -159,7 +168,7 @@ public class RoomGenerator : MonoBehaviour {
 
     //Creates a room by assigning it in the map and allocating north and west walls.
     //Should work, despite not allocation south and east, as long as all squares allocated.
-    public void createRoom(Rect dimensions)
+    public Room createRoom(Rect dimensions)
     {
 
         int xMin = (int)dimensions.x;
@@ -168,6 +177,10 @@ public class RoomGenerator : MonoBehaviour {
         int yMax = (int)dimensions.yMax - 1;
 
         Room room = new Room();
+        room.x = xMin;
+        room.y = yMin;
+        room.width = (int)dimensions.width;
+        room.height = (int)dimensions.height;
         rooms.Add(room);
 
         for(int x = xMin; x <= xMax; x++)
@@ -178,6 +191,8 @@ public class RoomGenerator : MonoBehaviour {
                 room.cells.Add(map[x, y]);
             }
         }
+
+        return room;
     }
 
     public void useTestData()
@@ -393,6 +408,20 @@ public class RoomGenerator : MonoBehaviour {
             int targetX = UnityEngine.Random.Range(0, map.GetLength(0));
             int targetY = UnityEngine.Random.Range(0, map.GetLength(1));
             patrols.Add(new PatrolRoute(map[startX, startY], map[targetX, targetY]));
+        }
+    }
+
+    private void calculateObjectiveLocations()
+    {
+        foreach(Room room in rooms)
+        {
+            if(room.type == Room.Type.objective)
+            {
+                int xOffset = UnityEngine.Random.Range(0, room.width);
+                int yOffset = UnityEngine.Random.Range(0, room.height);
+
+                objectives.Add(map[room.x + xOffset, room.y + yOffset]);
+            }
         }
     }
 }
