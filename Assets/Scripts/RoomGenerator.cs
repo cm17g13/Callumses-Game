@@ -74,22 +74,18 @@ public class PatrolRoute
     }
 }
 
-public class RoomGenerator {
+public class RoomGenerator : MonoBehaviour {
     public int minCorridorLength = 2;
     public int maxCorridorLength = 4;
     public int maxAccessPortals = 4;
     public int maxExtraPortals = 2;
+    public int mapSize = 10;
 
-    public int mapSize;
     public List<Boundry> boundries;
     public List<Room> rooms;
     public Cell[,] map;
     public List<PatrolRoute> patrols;
-
-    public RoomGenerator(int newMapSize)
-    {
-        mapSize = newMapSize;
-    }
+    public Cell spawnCell;
 
     public delegate void GridIterCallback(int x, int y);
     public void forEachCell(GridIterCallback callback)
@@ -130,13 +126,17 @@ public class RoomGenerator {
         Rect objectiveRoom = new Rect(2, 2, 4, 4);
         createRoom(objectiveRoom);
         createCorridors();
-
         determineAdjacentRooms();
         calculateBoundries();
-
         connectCorridors();
-
         calculatePatrols();
+
+        selectSpawnCell();
+    }
+
+    private void selectSpawnCell()
+    {
+        spawnCell = map[0, 0];
     }
 
     private void calculateBoundries()

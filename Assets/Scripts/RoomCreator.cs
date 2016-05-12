@@ -10,20 +10,13 @@ public class RoomCreator : MonoBehaviour {
     public float cellSizeInWorldUnits = 3;
     public float wallThickness = 0.1f;
     public float wallHeight = 3f;
-    public int worldSize = 10;
 
     private Dictionary<Dir, Vector3> offsets;
     private RoomGenerator generator;
 
-	// Use this for initialization
-	void Start () {
-        performCreation();
-    }
-
-    void performCreation()
+    public void performCreation(RoomGenerator newGenerator)
     {
-        generator = new RoomGenerator(worldSize);
-        generator.createMap();
+        generator = newGenerator;
         calculateOffsets();
         spawnArea();
         spawnEnemies();
