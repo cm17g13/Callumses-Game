@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityStandardAssets.Characters.FirstPerson;
 
 public class BotBulletScript : MonoBehaviour {
 
@@ -23,9 +24,7 @@ public class BotBulletScript : MonoBehaviour {
         }
         if (collision.gameObject.tag == "Player")
         {
-            //do more stuff here
-            //collision.gameObject.GetComponent<AI_Patrolling>().Hit(damage);
-            Destroy(collision.gameObject);
+			collision.gameObject.GetComponent<RigidbodyFirstPersonController>().Death();
         }
         Destroy(gameObject);
     }
