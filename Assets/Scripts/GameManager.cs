@@ -21,6 +21,11 @@ public class GameManager : MonoBehaviour {
     {
         return creator.gridToWorldPosition(generator.spawnCell.x, generator.spawnCell.y);
     }
+
+    public void NextLevel()
+    {
+        Application.LoadLevel("Game");
+    }
 	
 	// Update is called once per frame
 	void Update () {
