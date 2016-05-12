@@ -141,7 +141,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
 			}
 
             Cursor.lockState = CursorLockMode.Locked;
-            //Screen.lockCursor = true;
             Cursor.visible = false;
         }
 
@@ -154,9 +153,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 Cursor.lockState = CursorLockMode.None;
             }
             if (isLocked) Cursor.lockState = CursorLockMode.Locked;
-
-            //Screen.lockCursor = isLocked;
-            Cursor.visible =!isLocked;
+            Cursor.visible =!isLocked; 
 
             RotateView();
 
@@ -165,7 +162,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 m_Jump = true;
             }
 
-            if (Input.GetKeyDown(KeyCode.LeftControl) && !m_CrouchPressed)
+            /*if (Input.GetKeyDown(KeyCode.LeftControl) && !m_CrouchPressed)
             {
                 m_CrouchPressed = true;
             }
@@ -173,7 +170,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             if (Input.GetKeyUp(KeyCode.LeftControl) && m_CrouchPressed)
             {
                 m_CrouchPressed = false;
-            }
+            }*/
         }
 
 
@@ -249,7 +246,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
 			{
 				obj.SetActive(true);	
 			}
-			isLocked = false;
         }
 
 

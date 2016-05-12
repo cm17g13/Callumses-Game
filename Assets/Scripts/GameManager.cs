@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+
 public class GameManager : MonoBehaviour {
     public GameObject player;
     public RoomGenerator generator;
@@ -13,8 +14,8 @@ public class GameManager : MonoBehaviour {
 
         generator.createMap();
         creator.performCreation(generator);
-
-        player.transform.position = calculateSpawnPosition();
+		upgradedPlayer = Upgrade(GameObject player);
+		upgradedPlayer.transform.position = calculateSpawnPosition();
     }
 
     Vector3 calculateSpawnPosition()
@@ -31,4 +32,24 @@ public class GameManager : MonoBehaviour {
 	void Update () {
 	
 	}
+
+	void GameObject Upgrade(GameObject player) {
+		upgradeNumber = Random.Range (0, 4);
+		subPlayer = player.gameObject.transform.GetChild(0).GetChild(0).GetChild(0);
+		subplayer.GetComponent<SpawnPoint>();
+		switch(upgradeNumber)
+		{
+			case 0:
+				break;
+			case 1:
+				break;
+			case 2:
+				break;
+			case 3:
+				break;
+			case 4:
+		}
+		return player;
+	}
+
 }
