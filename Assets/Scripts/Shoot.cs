@@ -7,14 +7,26 @@ public class Shoot : MonoBehaviour {
 	public GameObject status;
 	public Material enabled;
 	public Material disabled;
-	public float speed = 40;
-    public float damage = 5;
-	private float time = 1;
-	public float shotTime = 1;
+	public float speed = 40F;
+    public float damage = 5F;
+	private float time = 1F;
+	public float shotTime = 1F;
 		
 	// Use this for initialization
 	void Start () {
 		
+	}
+
+	public void newSpeed() {
+		this.speed *= 2F;
+	}
+
+	public void newDamage() {
+		this.damage *= 2F;
+	}
+
+	public void newShotTime() {
+		this.shotTime *= 0.5F;
 	}
 	
 	// Update is called once per frame
