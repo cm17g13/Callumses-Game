@@ -17,6 +17,11 @@ public class RoomCreator : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        performCreation();
+    }
+
+    void performCreation()
+    {
         generator = new RoomGenerator(worldSize);
         generator.createMap();
         calculateOffsets();
