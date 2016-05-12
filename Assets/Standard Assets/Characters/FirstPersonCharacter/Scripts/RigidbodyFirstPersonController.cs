@@ -88,6 +88,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private bool m_Jump, m_PreviouslyGrounded, m_Jumping, m_IsGrounded, m_CrouchPressed, m_Crouching;
 
         public bool isLocked = true;
+		private GameObject[] gameOverUiObjects;
+		public Camera OverheadCamera;
 
 
         public Vector3 Velocity
@@ -128,8 +130,18 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_RigidBody = GetComponent<Rigidbody>();
             m_Capsule = GetComponent<CapsuleCollider>();
             mouseLook.Init (transform, cam.transform);
+
+			//Do a thing
+			gameOverUiObjects = GameObject.FindGameObjectsWithTag("GameOver");
+			//var objectCount = objects.Length;
+			
+			foreach (var obj in gameOverUiObjects)
+			{
+				obj.SetActive(false);
+			}
+
             Cursor.lockState = CursorLockMode.Locked;
-            Screen.lockCursor = true;
+            //Screen.lockCursor = true;
             Cursor.visible = false;
         }
 
@@ -143,7 +155,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
             if (isLocked) Cursor.lockState = CursorLockMode.Locked;
 
-            Screen.lockCursor = isLocked;
+            //Screen.lockCursor = isLocked;
             Cursor.visible =!isLocked;
 
             RotateView();
@@ -167,6 +179,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void FixedUpdate()
         {
+
             GroundCheck();
             Vector2 input = GetInput();
 
@@ -231,7 +244,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         public void Death()
         {
-            //Do a thing
+			OverheadCamera.enabled = false;
+			foreach (var obj in gameOverUiObjects)
+			{
+				obj.SetActive(true);	
+			}
+			isLocked = false;
         }
 
 

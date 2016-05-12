@@ -10,7 +10,6 @@ public class CanvasEditor : MonoBehaviour {
     {
         text = GetComponent<Text>();
         var objects = GameObject.FindGameObjectsWithTag("Bot");
-        var objectCount = objects.Length;
         AI_Patrolling.State highestRecordedState = AI_Patrolling.State.Passive;
 
         foreach (var obj in objects)

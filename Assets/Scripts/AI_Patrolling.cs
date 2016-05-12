@@ -118,7 +118,6 @@ public class AI_Patrolling : MonoBehaviour {
                 shoot();
                 time = 0;
             }
-			Debug.Log("Watching");
         }
         else if(chasing)
         {
