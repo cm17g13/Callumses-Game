@@ -33,7 +33,7 @@ public class RoomCreator : MonoBehaviour {
         };
     }
 
-    Vector3 gridToWorldPosition(int x, int y)
+    public Vector3 gridToWorldPosition(int x, int y)
     {
         return origin + new Vector3(x * cellSizeInWorldUnits, 0, -y * cellSizeInWorldUnits);
     }
