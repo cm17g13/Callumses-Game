@@ -61,6 +61,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
             {
                 get { return m_Running; }
             }
+		
+
 #endif
         }
 
@@ -91,6 +93,13 @@ namespace UnityStandardAssets.Characters.FirstPerson
 		private GameObject[] gameOverUiObjects;
 		public Camera OverheadCamera;
 
+		public void newForwardSpeed() {
+			this.movementSettings.ForwardSpeed += 1.0F;
+		}
+		
+		public void newJumpForce() {
+			this.movementSettings.JumpForce += 5F;
+		}
 
         public Vector3 Velocity
         {
