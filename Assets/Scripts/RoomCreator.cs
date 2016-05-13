@@ -98,7 +98,8 @@ public class RoomCreator : MonoBehaviour {
                 patrolPoint.transform.position = gridToWorldPosition(point.x, point.y);
                 botAi.patrolPoints.Add(patrolPoint.transform);
             }
-            bot.transform.position = botAi.patrolPoints[0].transform.position;
+            int patrolStart = UnityEngine.Random.value < 0.5f ? 0 : 1;
+            bot.transform.position = botAi.patrolPoints[patrolStart].transform.position;
         }
     }
 
