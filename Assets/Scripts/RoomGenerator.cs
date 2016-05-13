@@ -85,6 +85,7 @@ public class RoomGenerator : MonoBehaviour {
     public int maxAccessPortals = 4;
     public int maxExtraPortals = 2;
     public int mapSize = 10;
+    public float botQuantityScaling = 0.1f;
 
     public List<Boundry> boundries;
     public List<Room> rooms;
@@ -399,7 +400,7 @@ public class RoomGenerator : MonoBehaviour {
 
     private void calculatePatrols()
     {
-        int botQuantity = rooms.Count/12;
+        int botQuantity = (int)(botQuantityScaling * rooms.Count);
         List<double> haltonSeq2 = haltonSequence(botQuantity * 2, 2);
         List<double> haltonSeq3 = haltonSequence(botQuantity * 2, 3);
         for(int i = 0; i < botQuantity; i++)
