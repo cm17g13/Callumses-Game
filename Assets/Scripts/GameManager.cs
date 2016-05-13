@@ -44,6 +44,7 @@ public class GameManager : MonoBehaviour {
 
     // Use this for initialization
     void Start() {
+        generator.haltonSequence(5, 2);
         player = GameObject.FindGameObjectWithTag("Player");
 
         generator.createMap();

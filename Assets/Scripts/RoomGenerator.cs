@@ -388,7 +388,6 @@ public class RoomGenerator : MonoBehaviour {
         Dir corridorDirection = getArbitraryFreeDirection(location.x, location.y);
         int desiredLength = UnityEngine.Random.Range(minCorridorLength, maxCorridorLength);
         int actualLength = getMaxLengthInDirection(location.x, location.y, corridorDirection, desiredLength);
-
         int x = corridorDirection == Dir.West ? location.x - (actualLength - 1) : location.x;
         int y = corridorDirection == Dir.North ? location.y - (actualLength - 1) : location.y;
         int width = corridorDirection == Dir.North || corridorDirection == Dir.South ? 1 : actualLength;
@@ -401,12 +400,14 @@ public class RoomGenerator : MonoBehaviour {
     private void calculatePatrols()
     {
         int botQuantity = rooms.Count/12;
+        List<double> haltonSeq2 = haltonSequence(botQuantity * 2, 2);
+        List<double> haltonSeq3 = haltonSequence(botQuantity * 2, 3);
         for(int i = 0; i < botQuantity; i++)
         {
-            int startX = UnityEngine.Random.Range(0, map.GetLength(0));
-            int startY = UnityEngine.Random.Range(0, map.GetLength(1));
-            int targetX = UnityEngine.Random.Range(0, map.GetLength(0));
-            int targetY = UnityEngine.Random.Range(0, map.GetLength(1));
+            int startX = (int)(haltonSeq2[i * 2] * map.GetLength(0));
+            int startY = (int)(haltonSeq3[i * 2] * map.GetLength(1));
+            int targetX = (int)(haltonSeq2[i * 2 + 1] * map.GetLength(0));
+            int targetY = (int)(haltonSeq3[i * 2 + 1] * map.GetLength(1)); ;
             patrols.Add(new PatrolRoute(map[startX, startY], map[targetX, targetY]));
         }
     }
@@ -423,5 +424,30 @@ public class RoomGenerator : MonoBehaviour {
                 objectives.Add(map[room.x + xOffset, room.y + yOffset]);
             }
         }
+    }
+
+    public List<double> haltonSequence(int quantity, int seqBase)
+    {
+        List<double> sequence = new List<double>();
+        for(int i = 1; i <= quantity; i++)
+        {
+            sequence.Add(haltonSequenceElement(i, seqBase));
+            print(sequence[i-1]);
+        }
+        return sequence;
+    }
+
+    public double haltonSequenceElement(int index, int seqBase)
+    {
+        double result = 0;
+        double f = 1;
+        double i = index;
+        while (i > 0)
+        {
+            f = f / seqBase;
+            result = result + f * (i % seqBase);
+            i = Math.Floor(i / seqBase);
+        }
+        return result;
     }
 }
